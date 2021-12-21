@@ -1,7 +1,6 @@
 package agh.ics.oop;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 public class Animal {
     private Vector2d position;
@@ -10,21 +9,47 @@ public class Animal {
     //map
     //observer
     //energy cap
-    public int[] genes = new int[32];
+    private List<Integer> genes = new ArrayList<>();
 
-    public Animal(){
+    public Animal(Vector2d position, List<Integer> genes){
         this.energy = 2;
 
         // randomize genes
-        for (int i = 0; i < 32; i++){
-            int rand = (int) (Math.random() * 8);
-            genes[i] = rand;
+        if (genes == null) {
+            for (int i = 0; i < 32; i++) {
+                int rand = (int) (Math.random() * 8);
+                this.genes.add(rand);
+            }
+            Collections.sort(this.genes);
         }
-        Arrays.sort(genes);
+        else this.genes = genes;
+    }
 
-        for (int i = 0; i < 32; i++) {
-            System.out.println(genes[i]);
-        }
+    public List<Integer> giveGenes(int ratio, boolean leftSide, boolean stronger) {
+        int range = (genes.size() * ratio)/100;
+        if (stronger) range = (int) Math.ceil(range);
+        else range = (int) Math.floor(range);
+
+        List<Integer> res;
+        if (leftSide) res = genes.subList(0, range);
+        else res = genes.subList(genes.size()-range-1, genes.size()-1);
+
+        energy = Math.floorDiv(3*energy, 4);
+
+        return res;
+    }
+
+    public void eatPlant(int plantEnergy) {
+        energy += plantEnergy;
+    }
+
+    public int getRandomGene() {
+        int idx = (int) (Math.random() * 32);
+        return genes.get(idx);
+    }
+
+    public String printGenes() {
+        return genes.toString();
     }
 
     public Vector2d getPosition() {
@@ -37,5 +62,9 @@ public class Animal {
 
     public int getEnergy() {
         return energy;
+    }
+
+    public String toString() {
+        return String.format("(%d,%d)",position.x, position.y);
     }
 }
