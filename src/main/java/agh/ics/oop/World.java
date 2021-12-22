@@ -14,8 +14,8 @@ public class World {
 
         Vector2d eg = new Vector2d(1,1);
 
-        Animal pet1 = new Animal(eg, null);
-        Animal pet2 = new Animal(eg, null);
+        Animal pet1 = new Animal(eg, null, 6);
+        Animal pet2 = new Animal(eg, null, 8);
         System.out.println(pet1.printGenes());
         System.out.println(pet2.printGenes());
         MapCell cell = new MapCell(eg);
@@ -23,12 +23,15 @@ public class World {
         cell.animals.add(pet2);
         Animal child = cell.Breed();
         System.out.println(child.printGenes());
+        System.out.println(child.getEnergy());
+        cell.eatPlant();
+        System.out.println(pet2.getEnergy());
 
-        List<Animal> test = new ArrayList<>();
-        test.add(pet1);
-        test.add(pet2);
-        test.add(child);
-        System.out.println(Collections.max(test.stream().map(Animal::getEnergy).collect(Collectors.toList())));
+//        List<Animal> test = new ArrayList<>();
+//        test.add(pet1);
+//        test.add(pet2);
+//        test.add(child);
+//        System.out.println(Collections.max(test.stream().map(Animal::getEnergy).collect(Collectors.toList())));
 
     }
 }

@@ -11,6 +11,11 @@ public enum MapDirection {
     WEST,
     WEST_NORTH;
 
+    public MapDirection turnRight(int degree) {
+        int idx = (this.ordinal() + degree) % 8;
+        return MapDirection.values()[idx];
+    }
+
     public MapDirection next(){
         int idx = (this.ordinal()+1)%8;
         return MapDirection.values()[idx];

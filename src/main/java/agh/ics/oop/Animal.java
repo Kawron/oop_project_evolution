@@ -1,6 +1,7 @@
 package agh.ics.oop;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Animal {
     private Vector2d position;
@@ -11,9 +12,12 @@ public class Animal {
     //energy cap
     private List<Integer> genes = new ArrayList<>();
 
-    public Animal(Vector2d position, List<Integer> genes){
-        this.energy = 2;
+    public Animal(Vector2d position, List<Integer> genes, int energy){
+        this.energy = energy;
+        this.position = position;
 
+
+        List<String> upper = List.stream().map(String::toUpperCase).collect(Collectors.toList());
         // randomize genes
         if (genes == null) {
             for (int i = 0; i < 32; i++) {
@@ -46,6 +50,14 @@ public class Animal {
     public int getRandomGene() {
         int idx = (int) (Math.random() * 32);
         return genes.get(idx);
+    }
+
+    public void move(int gene) {
+        switch (gene) {
+            case 0 -> position.add(direction.toUnitVector());
+            case 4 -> position.subtract(direction.toUnitVector());
+            default -> direction.turnRight(gene);
+        }
     }
 
     public String printGenes() {
