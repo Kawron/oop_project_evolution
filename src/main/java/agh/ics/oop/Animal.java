@@ -1,23 +1,19 @@
 package agh.ics.oop;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Animal {
     private Vector2d position;
     private int energy;
     private MapDirection direction;
-    //map
-    //observer
-    //energy cap
     private List<Integer> genes = new ArrayList<>();
+    private List<IMoveObserver> observerList = new ArrayList<>();
 
     public Animal(Vector2d position, List<Integer> genes, int energy){
         this.energy = energy;
         this.position = position;
+        this.direction = MapDirection.NORTH;
 
-
-        List<String> upper = List.stream().map(String::toUpperCase).collect(Collectors.toList());
         // randomize genes
         if (genes == null) {
             for (int i = 0; i < 32; i++) {
@@ -53,10 +49,32 @@ public class Animal {
     }
 
     public void move(int gene) {
+        Vector2d oldPosition = position;
         switch (gene) {
-            case 0 -> position.add(direction.toUnitVector());
-            case 4 -> position.subtract(direction.toUnitVector());
-            default -> direction.turnRight(gene);
+            case 0 -> {
+                position = position.add(direction.toUnitVector());
+                notifyObservers(oldPosition, position);
+            }
+            case 4 -> {
+                position = position.subtract(direction.toUnitVector());
+                notifyObservers(oldPosition, position);
+            }
+            default -> direction = direction.turnRight(gene);
+        }
+        energy--;
+    }
+
+    public void addObserver(IMoveObserver observer) {
+        observerList.add(observer);
+    }
+
+    public void removeObserver(IMoveObserver observer) {
+        observerList.remove(observer);
+    }
+
+    public void notifyObservers(Vector2d oldPosition, Vector2d newPosition) {
+        for (IMoveObserver observer : observerList) {
+            observer.positionChanged(this, oldPosition, newPosition);
         }
     }
 

@@ -3,20 +3,23 @@ package agh.ics.oop;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MapCell{
+public class MapCell implements IMapCell {
     final Vector2d position;
+    final BorderMap map;
     public List<Animal> animals = new ArrayList<>();
-    private Boolean plantExist = true;
-    int plantEnergy = 5;
+
+    private Boolean plantExist = false;
+    final int plantEnergy = 5;
     final int energyToBreed;
 
-    public MapCell(Vector2d position){
+    public MapCell(Vector2d position, BorderMap map){
         this.energyToBreed = 0;
         this.position = position;
+        this.map = map;
     }
 
 //    Jeżeli jest więcej niż dwoje zwierząt na jednej pozycji, to rozmnażają się te, które mają największą energię.
-    public Animal Breed() {
+    public void breed() {
         // tutaj może coś poprawić? żeby usunąc te fory
         // find first pet
         Animal strongParent = null;
@@ -38,7 +41,7 @@ public class MapCell{
         }
 
         if (strongParent == null || weakParent == null) {
-            return null;
+            return;
         }
 
         int weakRatio = Math.floorDiv(weakParent.getEnergy()*100,weakParent.getEnergy() + strongParent.getEnergy());
@@ -53,11 +56,14 @@ public class MapCell{
         genes.addAll(weakParent.giveGenes(weakRatio, !side, false));
         Collections.sort(genes);
 
-        return new Animal(position, genes, childEnergy);
+        Animal child = new Animal(position, genes, childEnergy);
+        map.animalBorn(this, child);
+//        map.placeAnimal(new Animal(position, genes, childEnergy));
+//        return new Animal(position, genes, childEnergy);
     }
 
     public void eatPlant() {
-        if (!plantExist) return;
+        if (!plantExist || animals.size() == 0) return;
 
         List<Integer> energyLevels = animals.stream().map(Animal::getEnergy).collect(Collectors.toList());
         int maximum = Collections.max(energyLevels);
@@ -71,4 +77,25 @@ public class MapCell{
         plantExist = !plantExist;
     }
 
+    public void buryAnimals() {
+        for (Animal pet : animals) {
+            if (pet.getEnergy() < 0) {
+                pet.removeObserver(map);
+                animals.remove(pet);
+                map.animalDied(this, pet);
+            }
+        }
+    }
+
+    public void animalEnteredCell(Animal animal) {
+        animals.add(animal);
+    }
+
+    public void animalLeftCell(Animal animal) {
+        animals.remove(animal);
+    }
+
+    public boolean isEmpty() {
+        return animals.size() == 0;
+    }
 }

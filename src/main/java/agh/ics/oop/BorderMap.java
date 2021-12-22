@@ -1,10 +1,12 @@
 package agh.ics.oop;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class BorderMap {
+public class BorderMap implements IWorldMap {
 
     final int width;
     final int height;
@@ -12,7 +14,9 @@ public class BorderMap {
     final int jungleWidth;
     final Vector2d jungleCorner;
 
-    private HashMap<Vector2d, MapCell> mapCells;
+//    private HashMap<Vector2d, List<Animal>> animals = new HashMap<>();
+    private List<Animal> animals = new ArrayList<>();
+    private HashMap<Vector2d, IMapCell> mapCells;
 
     public BorderMap(int width, int height, int jungleRatio){
         this.width = width;
@@ -29,10 +33,47 @@ public class BorderMap {
         for (int x = 0; x < this.width; x++) {
             for (int y = 0; y < this.height; y++) {
                 Vector2d key = new Vector2d(x,y);
-                MapCell value = new MapCell(key);
+                MapCell value = new MapCell(key, this);
                 mapCells.put(key, value);
             }
         }
     }
 
+    public void placeAnimal(Animal pet) {
+        Vector2d position = pet.getPosition();
+        animals.add(pet);
+//        List<Animal> petList = animals.computeIfAbsent(position, k -> new LinkedList<Animal>());
+
+//        petList.add(pet);
+        pet.addObserver(this);
+
+        mapCells.get(position).animalEnteredCell(pet);
+    }
+
+    public void positionChanged(Animal pet, Vector2d oldPosition, Vector2d newPosition) {
+//        List<Animal> petList = animals.get(oldPosition);
+//        petList.remove(pet);
+        mapCells.get(oldPosition).animalLeftCell(pet);
+
+//        petList = animals.computeIfAbsent(newPosition, k -> new LinkedList<Animal>());
+//        petList.add(pet);
+        mapCells.get(newPosition).animalEnteredCell(pet);
+    }
+
+    public boolean canMove(Vector2d position) {
+        return position.x <= width && position.y <= height;
+    }
+
+    public void animalDied(MapCell cell, Animal animal) {
+        animals.get(cell.position).remove(animal);
+        // spr czy animals puste
+    }
+
+    public void animalBorn(MapCell cell, Animal animal) {
+        animals.get(cell.position).add(animal);
+    }
+
+    public List<IMapCell> getAllCells() {
+        return new ArrayList<>(mapCells.values());
+    }
 }
