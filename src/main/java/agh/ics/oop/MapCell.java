@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 public class MapCell implements IMapCell {
     final Vector2d position;
     final BorderMap map;
-    public List<Animal> animals = new ArrayList<>();
+    public List<Animal> animals;
 
     private Boolean plantExist = false;
     final int plantEnergy = 5;
@@ -20,8 +20,8 @@ public class MapCell implements IMapCell {
 
 //    Jeżeli jest więcej niż dwoje zwierząt na jednej pozycji, to rozmnażają się te, które mają największą energię.
     public void breed() {
-        // tutaj może coś poprawić? żeby usunąc te fory
-        // find first pet
+        animals = map.getAnimalsOnCell(this);
+
         Animal strongParent = null;
         int maximum = energyToBreed;
         for (Animal value : animals) {
@@ -58,11 +58,11 @@ public class MapCell implements IMapCell {
 
         Animal child = new Animal(position, genes, childEnergy);
         map.animalBorn(this, child);
-//        map.placeAnimal(new Animal(position, genes, childEnergy));
-//        return new Animal(position, genes, childEnergy);
     }
 
     public void eatPlant() {
+        animals = map.getAnimalsOnCell(this);
+
         if (!plantExist || animals.size() == 0) return;
 
         List<Integer> energyLevels = animals.stream().map(Animal::getEnergy).collect(Collectors.toList());
@@ -78,6 +78,8 @@ public class MapCell implements IMapCell {
     }
 
     public void buryAnimals() {
+        animals = map.getAnimalsOnCell(this);
+
         for (Animal pet : animals) {
             if (pet.getEnergy() < 0) {
                 pet.removeObserver(map);
@@ -85,17 +87,5 @@ public class MapCell implements IMapCell {
                 map.animalDied(this, pet);
             }
         }
-    }
-
-    public void animalEnteredCell(Animal animal) {
-        animals.add(animal);
-    }
-
-    public void animalLeftCell(Animal animal) {
-        animals.remove(animal);
-    }
-
-    public boolean isEmpty() {
-        return animals.size() == 0;
     }
 }

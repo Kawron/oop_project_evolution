@@ -14,8 +14,8 @@ public class BorderMap implements IWorldMap {
     final int jungleWidth;
     final Vector2d jungleCorner;
 
-//    private HashMap<Vector2d, List<Animal>> animals = new HashMap<>();
-    private List<Animal> animals = new ArrayList<>();
+    private HashMap<Vector2d, List<Animal>> animals = new HashMap<>();
+//    private List<Animal> animals = new ArrayList<>();
     private HashMap<Vector2d, IMapCell> mapCells;
 
     public BorderMap(int width, int height, int jungleRatio){
@@ -41,23 +41,18 @@ public class BorderMap implements IWorldMap {
 
     public void placeAnimal(Animal pet) {
         Vector2d position = pet.getPosition();
-        animals.add(pet);
-//        List<Animal> petList = animals.computeIfAbsent(position, k -> new LinkedList<Animal>());
+        List<Animal> petList = animals.computeIfAbsent(position, k -> new LinkedList<Animal>());
 
-//        petList.add(pet);
+        petList.add(pet);
         pet.addObserver(this);
-
-        mapCells.get(position).animalEnteredCell(pet);
     }
 
     public void positionChanged(Animal pet, Vector2d oldPosition, Vector2d newPosition) {
-//        List<Animal> petList = animals.get(oldPosition);
-//        petList.remove(pet);
-        mapCells.get(oldPosition).animalLeftCell(pet);
+        List<Animal> petList = animals.get(oldPosition);
+        petList.remove(pet);
 
-//        petList = animals.computeIfAbsent(newPosition, k -> new LinkedList<Animal>());
-//        petList.add(pet);
-        mapCells.get(newPosition).animalEnteredCell(pet);
+        petList = animals.computeIfAbsent(newPosition, k -> new LinkedList<Animal>());
+        petList.add(pet);
     }
 
     public boolean canMove(Vector2d position) {
@@ -66,11 +61,14 @@ public class BorderMap implements IWorldMap {
 
     public void animalDied(MapCell cell, Animal animal) {
         animals.get(cell.position).remove(animal);
-        // spr czy animals puste
     }
 
     public void animalBorn(MapCell cell, Animal animal) {
         animals.get(cell.position).add(animal);
+    }
+
+    public List<Animal> getAnimalOnCell(IMapCell cell) {
+        return animals.get(cell);
     }
 
     public List<IMapCell> getAllCells() {
