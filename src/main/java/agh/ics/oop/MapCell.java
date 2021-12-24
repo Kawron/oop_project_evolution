@@ -105,4 +105,16 @@ public class MapCell implements IMapCell {
     public void putPlant() {
         plantExist = !plantExist;
     }
+
+    public Animal getStrongest() {
+        Animal pet = null;
+        int maximum = -1;
+        for (Animal value : animals) {
+            if (value.getEnergy() > maximum) {
+                maximum = value.getEnergy();
+                pet = value;
+            }
+        }
+        return pet;
+    }
 }

@@ -18,4 +18,8 @@ public interface IWorldMap extends IMoveObserver{
     HashMap<Vector2d, List<Animal>> getAnimals();
 
     HashMap<Vector2d, IMapCell> getCells();
+
+    int getWidth();
+
+    int getHeight();
 }

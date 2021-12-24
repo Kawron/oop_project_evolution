@@ -13,4 +13,6 @@ public interface IMapCell {
     boolean plantExist();
 
     void putPlant();
+
+    Animal getStrongest();
 }

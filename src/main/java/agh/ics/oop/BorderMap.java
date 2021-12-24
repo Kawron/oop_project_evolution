@@ -100,4 +100,12 @@ public class BorderMap implements IWorldMap {
         int y = rand.nextInt(heightBound);
         return new Vector2d(x, y);
     }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
 }
