@@ -1,5 +1,6 @@
 package agh.ics.oop;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface IWorldMap extends IMoveObserver{
@@ -14,7 +15,7 @@ public interface IWorldMap extends IMoveObserver{
 
     List<Animal> getAnimalsOnCell(IMapCell cell);
 
-    List<IMapCell> getAllCells();
+    HashMap<Vector2d, List<Animal>> getAnimals();
 
-//    void positionChanged(Animal pet, Vector2d oldPosition, Vector2d newPosition);
+    HashMap<Vector2d, IMapCell> getCells();
 }

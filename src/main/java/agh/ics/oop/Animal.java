@@ -26,17 +26,18 @@ public class Animal {
     }
 
     public List<Integer> giveGenes(int ratio, boolean leftSide, boolean stronger) {
-        int range = (genes.size() * ratio)/100;
-        if (stronger) range = (int) Math.ceil(range);
-        else range = (int) Math.floor(range);
+        int range;
+        if (stronger) range = (int) Math.ceil((float) (genes.size() * ratio)/100);
+        else range = (int) Math.floor((float) (genes.size() * ratio)/100);
 
         List<Integer> res;
         if (leftSide) res = genes.subList(0, range);
-        else res = genes.subList(genes.size()-range-1, genes.size()-1);
+        else res = genes.subList(genes.size()-range, genes.size());
 
         energy = Math.floorDiv(3*energy, 4);
 
-        return res;
+        List<Integer> copyOfGenes = new ArrayList<>(res);
+        return copyOfGenes;
     }
 
     public void eatPlant(int plantEnergy) {

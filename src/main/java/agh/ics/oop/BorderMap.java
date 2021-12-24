@@ -1,10 +1,6 @@
 package agh.ics.oop;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class BorderMap implements IWorldMap {
 
@@ -13,16 +9,15 @@ public class BorderMap implements IWorldMap {
     final int jungleRatio;
     final int jungleWidth;
     final Vector2d jungleCorner;
+    final Random rand = new Random();
 
-    private HashMap<Vector2d, List<Animal>> animals = new HashMap<>();
-//    private List<Animal> animals = new ArrayList<>();
-    private HashMap<Vector2d, IMapCell> mapCells;
+    private final HashMap<Vector2d, List<Animal>> animals = new HashMap<>();
+    private final HashMap<Vector2d, IMapCell> cells = new HashMap<>();
 
     public BorderMap(int width, int height, int jungleRatio){
         this.width = width;
         this.height = height;
         this.jungleRatio = jungleRatio;
-        this.mapCells = new HashMap<>();
 
         double mapArea = width*height;
         this.jungleWidth = (int) Math.floor(Math.sqrt(mapArea/jungleRatio));
@@ -34,14 +29,14 @@ public class BorderMap implements IWorldMap {
             for (int y = 0; y < this.height; y++) {
                 Vector2d key = new Vector2d(x,y);
                 MapCell value = new MapCell(key, this);
-                mapCells.put(key, value);
+                cells.put(key, value);
             }
         }
     }
 
     public void placeAnimal(Animal pet) {
         Vector2d position = pet.getPosition();
-        List<Animal> petList = animals.computeIfAbsent(position, k -> new LinkedList<Animal>());
+        List<Animal> petList = animals.computeIfAbsent(position, k -> new ArrayList<>());
 
         petList.add(pet);
         pet.addObserver(this);
@@ -51,27 +46,58 @@ public class BorderMap implements IWorldMap {
         List<Animal> petList = animals.get(oldPosition);
         petList.remove(pet);
 
-        petList = animals.computeIfAbsent(newPosition, k -> new LinkedList<Animal>());
+        petList = animals.computeIfAbsent(newPosition, k -> new ArrayList<>());
         petList.add(pet);
     }
 
     public boolean canMove(Vector2d position) {
-        return position.x <= width && position.y <= height;
+        return position.x < width && position.x >= 0 && position.y < height && position.y >= 0;
     }
 
-    public void animalDied(MapCell cell, Animal animal) {
-        animals.get(cell.position).remove(animal);
+    public void animalDied(IMapCell cell, Animal animal) {
+        animals.get(cell.getPosition()).remove(animal);
     }
 
-    public void animalBorn(MapCell cell, Animal animal) {
-        animals.get(cell.position).add(animal);
+    public void animalBorn(IMapCell cell, Animal animal) {
+        animals.get(cell.getPosition()).add(animal);
     }
 
-    public List<Animal> getAnimalOnCell(IMapCell cell) {
-        return animals.get(cell);
+    public List<Animal> getAnimalsOnCell(IMapCell cell) {
+        if (animals.get(cell.getPosition()) == null) System.out.println("kurwa");
+        return animals.get(cell.getPosition());
     }
 
-    public List<IMapCell> getAllCells() {
-        return new ArrayList<>(mapCells.values());
+    public HashMap<Vector2d, IMapCell> getCells() {
+        return cells;
+    }
+
+    public HashMap<Vector2d, List<Animal>> getAnimals() {
+        return animals;
+    }
+
+    public void putPlants() {
+        Vector2d junglePlantPos;
+        Vector2d stepPlantPos;
+
+        while (true) {
+            junglePlantPos = jungleCorner.add(randomPosition(jungleWidth, jungleWidth));
+            if (!cells.get(junglePlantPos).plantExist()) {
+                cells.get(junglePlantPos).putPlant();
+                break;
+            }
+        }
+        while (true) {
+            stepPlantPos = randomPosition(width, height);
+            if (!cells.get(stepPlantPos).plantExist()) {
+                cells.get(stepPlantPos).putPlant();
+                break;
+            }
+        }
+    }
+
+    private Vector2d randomPosition(int widthBound, int heightBound) {
+        int x = rand.nextInt(widthBound);
+        int y = rand.nextInt(heightBound);
+        return new Vector2d(x, y);
     }
 }

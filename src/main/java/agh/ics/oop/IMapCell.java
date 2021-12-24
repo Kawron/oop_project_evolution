@@ -7,4 +7,10 @@ public interface IMapCell {
     void eatPlant();
 
     void buryAnimals();
+
+    Vector2d getPosition();
+
+    boolean plantExist();
+
+    void putPlant();
 }

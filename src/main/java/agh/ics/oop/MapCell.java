@@ -7,6 +7,7 @@ public class MapCell implements IMapCell {
     final Vector2d position;
     final BorderMap map;
     public List<Animal> animals;
+    Stack<Animal> animalStack = new Stack<>();
 
     private Boolean plantExist = false;
     final int plantEnergy = 5;
@@ -18,7 +19,6 @@ public class MapCell implements IMapCell {
         this.map = map;
     }
 
-//    Jeżeli jest więcej niż dwoje zwierząt na jednej pozycji, to rozmnażają się te, które mają największą energię.
     public void breed() {
         animals = map.getAnimalsOnCell(this);
 
@@ -53,7 +53,8 @@ public class MapCell implements IMapCell {
         int childEnergy = Math.floorDiv(weakParent.getEnergy() + strongParent.getEnergy(),4);
 
         List<Integer> genes = strongParent.giveGenes(strongRatio, side, true);
-        genes.addAll(weakParent.giveGenes(weakRatio, !side, false));
+        List<Integer> weakGenes = weakParent.giveGenes(weakRatio, !side, false);
+        genes.addAll(weakGenes);
         Collections.sort(genes);
 
         Animal child = new Animal(position, genes, childEnergy);
@@ -83,9 +84,25 @@ public class MapCell implements IMapCell {
         for (Animal pet : animals) {
             if (pet.getEnergy() < 0) {
                 pet.removeObserver(map);
-                animals.remove(pet);
-                map.animalDied(this, pet);
+                animalStack.push(pet);
+//                animals.remove(pet);
+//                map.animalDied(this, pet);
             }
         }
+        while (!animalStack.isEmpty()) {
+            animals.remove(animalStack.pop());
+        }
+    }
+
+    public Vector2d getPosition() {
+        return position;
+    }
+
+    public boolean plantExist() {
+        return plantExist;
+    }
+
+    public void putPlant() {
+        plantExist = !plantExist;
     }
 }
