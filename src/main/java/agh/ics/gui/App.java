@@ -2,6 +2,7 @@ package agh.ics.gui;
 
 import agh.ics.oop.*;
 import javafx.application.Application;
+import javafx.scene.ImageCursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 public class App extends Application {
 
     IWorldMap map = new BorderMap(20,30,2);
-    ISimulationEngine engine = new SimulationEngine(100, map);
+    ISimulationEngine engine = new SimulationEngine(10000, map);
     GuiBoxGenerator generator = new GuiBoxGenerator();
 
     HBox mainBox;
@@ -58,15 +59,12 @@ public class App extends Application {
             cnt ++;
         }
 
-        HashMap<Vector2d, List<Animal>> animals = map.getAnimals();
-        List<Vector2d> validPositions = animals.entrySet()
-                .stream()
-                .filter(x -> x.getValue().size() > 0)
-                .map(Map.Entry::getKey).collect(Collectors.toList());
+        // można zrobic hashmape z roslinam i zwierzakami
+        System.out.println(map.getAnimals().size());
 
-        System.out.println(validPositions);
-        for (Vector2d position : validPositions) {
-            IMapCell cell = map.getCells().get(position);
+        for (IMapCell cell : map.getCells().values()) {
+            Vector2d position = cell.getPosition();
+
             VBox node = generator.getVBox(cell);
             pane.add(node, position.x+1,map.getHeight()-position.y+1,1,1);
         }
@@ -74,7 +72,6 @@ public class App extends Application {
     }
 
     public void initScene() {
-        engine.run();
         leftMap = new GridPane();
         updateGrid(leftMap);
 
@@ -91,9 +88,11 @@ public class App extends Application {
     public void start(Stage primaryStage) {
         initScene();
 
+        engine.run();
         Scene scene = new Scene(mainBox, 1000, 750);
         primaryStage.setScene(scene);
         primaryStage.show();
+        initScene();
     }
 
 }

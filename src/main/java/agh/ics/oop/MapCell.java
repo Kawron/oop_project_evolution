@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 public class MapCell implements IMapCell {
     final Vector2d position;
     final BorderMap map;
-    public List<Animal> animals;
-    Stack<Animal> animalStack = new Stack<>();
+    public List<Animal> animals = new ArrayList<>();
+    private Stack<Animal> animalsToRemove = new Stack<>();
 
     private Boolean plantExist = false;
     final int plantEnergy = 5;
@@ -19,9 +19,15 @@ public class MapCell implements IMapCell {
         this.map = map;
     }
 
-    public void breed() {
-        animals = map.getAnimalsOnCell(this);
+    public void animalEnteredCell(Animal pet) {
+        animals.add(pet);
+    }
 
+    public void animalLeftCell(Animal pet) {
+        animals.remove(pet);
+    }
+
+    public void breed() {
         Animal strongParent = null;
         int maximum = energyToBreed;
         for (Animal value : animals) {
@@ -59,11 +65,10 @@ public class MapCell implements IMapCell {
 
         Animal child = new Animal(position, genes, childEnergy);
         animals.add(child);
+        map.animalBorn(child);
     }
 
     public void eatPlant() {
-        animals = map.getAnimalsOnCell(this);
-
         if (!plantExist || animals.size() == 0) return;
 
         List<Integer> energyLevels = animals.stream().map(Animal::getEnergy).collect(Collectors.toList());
@@ -79,16 +84,17 @@ public class MapCell implements IMapCell {
     }
 
     public void buryAnimals() {
-        animals = map.getAnimalsOnCell(this);
-
         for (Animal pet : animals) {
             if (pet.getEnergy() < 0) {
-                pet.removeObserver(map);
-                animalStack.push(pet);
+                animalsToRemove.push(pet);
             }
         }
-        while (!animalStack.isEmpty()) {
-            animals.remove(animalStack.pop());
+        Animal petToRemove;
+        while (!animalsToRemove.isEmpty()) {
+            petToRemove = animalsToRemove.pop();
+            petToRemove.removeObserver(map);
+            animals.remove(petToRemove);
+            map.animalDied(petToRemove);
         }
     }
 
@@ -114,5 +120,13 @@ public class MapCell implements IMapCell {
             }
         }
         return pet;
+    }
+
+    public List<Animal> getAnimals() {
+        return animals;
+    }
+
+    public boolean hasAnimals() {
+        return animals.size() > 0;
     }
 }

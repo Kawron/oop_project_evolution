@@ -1,5 +1,6 @@
 package agh.ics.oop;
 
+import java.lang.invoke.VarHandle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -7,49 +8,39 @@ public class TaskManager implements ITaskManager {
 
     IWorldMap map;
     ISimulationEngine engine;
-    HashMap<Vector2d, List<Animal>> animals;
-    List<Vector2d> validPositions;
-    HashMap<Vector2d, IMapCell> cells;
-    Stack<Animal> animalStack = new Stack<>();
-    Stack<Integer> geneStack = new Stack<>();
+    List<IMapCell> validCells;
+    List<Animal> animals;
 
     public TaskManager(IWorldMap map, ISimulationEngine engine) {
         this.map = map;
         this.engine = engine;
-        this.cells = map.getCells();
     }
 
-    // imo to powinno być w mapie
-    private void getData() {
-        animals = map.getAnimals();
-        validPositions = animals.entrySet()
-                .stream()
-                .filter(x -> x.getValue().size() > 0)
-                .map(Map.Entry::getKey).collect(Collectors.toList());
+    private void getValidCells() {
+        validCells = map.getCells().values().stream().filter(IMapCell::hasAnimals).collect(Collectors.toList());
     }
 
     public void breedAnimals() {
-        getData();
+        getValidCells();
 
-        for (Vector2d position : validPositions) {
-            cells.get(position).breed();
+        for (IMapCell cell : validCells) {
+            cell.breed();
         }
     }
 
     public void buryAnimals() {
-        getData();
+        getValidCells();
 
-        for (Vector2d position : validPositions) {
-            cells.get(position).buryAnimals();
+        for (IMapCell cell : validCells) {
+            cell.buryAnimals();
         }
     }
 
     public void feedAnimals() {
-        getData();
+        getValidCells();
 
-        for (Vector2d position : validPositions) {
-            IMapCell cell = cells.get(position);
-            cells.get(position).eatPlant();
+        for (IMapCell cell : validCells) {
+            cell.eatPlant();
         }
     }
 
@@ -58,36 +49,27 @@ public class TaskManager implements ITaskManager {
         MapDirection direction;
         Vector2d position;
 
-        getData();
+        animals = map.getAnimals();
 
-        // tutaj grubo zle
-        for (Vector2d cellPosition : validPositions) {
-            for (Animal pet : animals.get(cellPosition)) {
-                gene = pet.getRandomGene();
-                direction = pet.getDirection();
-                position = pet.getPosition();
+        for (Animal pet : animals) {
+            gene = pet.getRandomGene();
+            direction = pet.getDirection();
+            position = pet.getPosition();
 
-                switch (gene) {
-                    case 0:
-                        if (map.canMove(position.add(direction.toUnitVector()))) {
-                            animalStack.push(pet);
-                            geneStack.push(gene);
-                        }
-                        break;
-                    case 4:
-                        if (map.canMove(position.add(direction.toUnitVector().opposite()))) {
-                            animalStack.push(pet);
-                            geneStack.push(gene);
-                        }
-                        break;
-                    default: animalStack.push(pet); geneStack.push(gene);
+            switch (gene) {
+                case 0:
+                    if (map.canMove(position.add(direction.toUnitVector()))) {
+                        pet.move(gene);
+                    }
+                    break;
+                case 4:
+                    if (map.canMove(position.add(direction.toUnitVector().opposite()))) {
+                        pet.move(gene);
+                    }
+                    break;
+                default: pet.move(gene);
 
-                }
             }
-        }
-        while (!animalStack.isEmpty()) {
-            gene = geneStack.pop();
-            animalStack.pop().move(gene);
         }
     }
 }

@@ -34,6 +34,9 @@ public class GuiBoxGenerator {
         if (cell.getStrongest() == null && cell.plantExist()) {
             return plant;
         }
+        else if (cell.getStrongest() == null) {
+            return null;
+        }
         Animal pet = cell.getStrongest();
         return switch (pet.getDirection()) {
             case NORTH, NORTH_EAST -> up;

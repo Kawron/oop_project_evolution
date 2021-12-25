@@ -1,10 +1,16 @@
 package agh.ics.oop;
 
+import java.util.List;
+
 public interface IMapCell {
 
     void breed();
 
     void eatPlant();
+
+    void animalEnteredCell(Animal pet);
+
+    void animalLeftCell(Animal pet);
 
     void buryAnimals();
 
@@ -15,4 +21,8 @@ public interface IMapCell {
     void putPlant();
 
     Animal getStrongest();
+
+    List<Animal> getAnimals();
+
+    boolean hasAnimals();
 }

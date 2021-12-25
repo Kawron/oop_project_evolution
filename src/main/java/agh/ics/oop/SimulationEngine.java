@@ -11,7 +11,7 @@ public class SimulationEngine implements ISimulationEngine{
     IWorldMap map;
     final ITaskManager manager;
     private Random rand = new Random();
-    private int startingEnergy = 10000;
+    private int startingEnergy = 1000;
 
     public SimulationEngine(int numOfAnimals, IWorldMap map) {
         this.map = map;
@@ -33,7 +33,7 @@ public class SimulationEngine implements ISimulationEngine{
          */
         long startTime;
         long endTime;
-        while (day < 900) {
+        while (map.getAnimals().size() > 0) {
             startTime = System.nanoTime();
             manager.buryAnimals();
             manager.moveAnimals();
@@ -42,8 +42,9 @@ public class SimulationEngine implements ISimulationEngine{
             map.putPlants();
             day++;
             endTime = System.nanoTime();
-            System.out.println(endTime-startTime);
+//            System.out.println(endTime-startTime);
             System.out.println(day);
+            System.out.println(map.getAnimals().size());
         }
         System.out.println("Done");
     }

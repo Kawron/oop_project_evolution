@@ -12,9 +12,8 @@ public class BorderMap implements IWorldMap {
     final Random rand = new Random();
 
     private final List<Animal> animals = new ArrayList<>();
-    private final HashMap<Vector2d, List<Animal>> animalsOnCells = new HashMap<>();
     private final HashMap<Vector2d, IMapCell> cells = new HashMap<>();
-    private final HashMap<Vector2d, IMapCell> cellsWithPlants = new HashMap<>();
+//    private final HashMap<Vector2d, IMapCell> activeCells = new HashMap<>();
 
     public BorderMap(int width, int height, int jungleRatio){
         this.width = width;
@@ -38,38 +37,30 @@ public class BorderMap implements IWorldMap {
 
     public void placeAnimal(Animal pet) {
         Vector2d position = pet.getPosition();
-        List<Animal> petList = animalsOnCells.computeIfAbsent(position, k -> new ArrayList<>());
-        petList.add(pet);
+        cells.get(position).animalEnteredCell(pet);
 
         animals.add(pet);
-
         pet.addObserver(this);
     }
 
     public void positionChanged(Animal pet, Vector2d oldPosition, Vector2d newPosition) {
-        List<Animal> petList = animalsOnCells.get(oldPosition);
-        petList.remove(pet);
+        IMapCell oldCell = cells.get(oldPosition);
+        IMapCell newCell = cells.get(newPosition);
 
-        petList = animalsOnCells.computeIfAbsent(newPosition, k -> new ArrayList<>());
-        petList.add(pet);
+        oldCell.animalLeftCell(pet);
+        newCell.animalEnteredCell(pet);
     }
 
     public boolean canMove(Vector2d position) {
         return position.x < width && position.x >= 0 && position.y < height && position.y >= 0;
     }
 
-    public void animalDied(IMapCell cell, Animal pet) {
-        animalsOnCells.get(cell.getPosition()).remove(pet);
+    public void animalDied(Animal pet) {
         animals.remove(pet);
     }
 
-    public void animalBorn(IMapCell cell, Animal pet) {
-        animalsOnCells.get(cell.getPosition()).add(pet);
+    public void animalBorn(Animal pet) {
         animals.add(pet);
-    }
-
-    public List<Animal> getAnimalsOnCell(IMapCell cell) {
-        return animalsOnCells.get(cell.getPosition());
     }
 
     public HashMap<Vector2d, IMapCell> getCells() {

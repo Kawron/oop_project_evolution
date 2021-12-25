@@ -9,11 +9,9 @@ public interface IWorldMap extends IMoveObserver{
 
     boolean canMove(Vector2d position);
 
-    void animalDied(IMapCell cell, Animal animal);
+    void animalDied(Animal animal);
 
-    void animalBorn(IMapCell cell, Animal animal);
-
-    List<Animal> getAnimalsOnCell(IMapCell cell);
+    void animalBorn(Animal animal);
 
     List<Animal> getAnimals();
 
