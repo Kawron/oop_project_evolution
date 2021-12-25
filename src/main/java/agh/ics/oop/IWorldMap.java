@@ -7,17 +7,17 @@ public interface IWorldMap extends IMoveObserver{
 
     void placeAnimal(Animal pet);
 
-    boolean canMove(Vector2d position);
-
     void animalDied(Animal animal);
 
     void animalBorn(Animal animal);
 
+    void putPlants();
+
+    boolean canMove(Vector2d position);
+
     List<Animal> getAnimals();
 
     HashMap<Vector2d, IMapCell> getCells();
-
-    void putPlants();
 
     int getWidth();
 

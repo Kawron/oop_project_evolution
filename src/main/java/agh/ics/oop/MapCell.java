@@ -10,11 +10,10 @@ public class MapCell implements IMapCell {
     private Stack<Animal> animalsToRemove = new Stack<>();
 
     private Boolean plantExist = false;
-    final int plantEnergy = 5;
-    final int energyToBreed;
+    final int plantEnergy = 15;
+    final int energyToBreed = 100;
 
     public MapCell(Vector2d position, BorderMap map){
-        this.energyToBreed = 0;
         this.position = position;
         this.map = map;
     }

@@ -2,6 +2,7 @@ package agh.ics.gui;
 
 import agh.ics.oop.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.ImageCursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -9,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,17 +18,20 @@ import java.util.stream.Collectors;
 
 public class App extends Application {
 
-    IWorldMap map = new BorderMap(20,30,2);
-    ISimulationEngine engine = new SimulationEngine(10000, map);
-    GuiBoxGenerator generator = new GuiBoxGenerator();
+    IWorldMap map = new BorderMap(10,10,2);
+    ISimulationEngine engine = new SimulationEngine(100, map, this);
+    GuiBoxGenerator generator = new GuiBoxGenerator(map);
+    Thread thread;
 
     HBox mainBox;
     GridPane leftMap;
     VBox options;
     GridPane rightMap;
 
-    int maxWidth = 30;
-    int maxHeight = 60;
+    int minWidth = 10;
+    int minHeight = 10;
+    int maxWidth = 25;
+    int maxHeight = 50;
 
     public void initOptions() {
 //        map = new BorderMap(20, 50, 2);
@@ -66,9 +71,13 @@ public class App extends Application {
             Vector2d position = cell.getPosition();
 
             VBox node = generator.getVBox(cell);
-            pane.add(node, position.x+1,map.getHeight()-position.y+1,1,1);
+            pane.add(node, position.x+1,map.getHeight()-position.y,1,1);
         }
         pane.setGridLinesVisible(true);
+    }
+
+    public void renderNextDay() {
+        Platform.runLater(() -> updateGrid(leftMap));
     }
 
     public void initScene() {
@@ -78,21 +87,32 @@ public class App extends Application {
         Button startButton = new Button("Start");
         startButton.setMinWidth(100);
         startButton.setMinHeight(40);
-        startButton.setOnAction((event -> {
-            System.out.println("przycisk dziala");
-        }));
+        startButton.setOnAction((actionEvent) -> {
+            thread = new Thread(() -> engine.run());
+            thread.start();
+        });
 
-        mainBox = new HBox(leftMap, startButton);
+        Button stopButton = new Button("Stop");
+        stopButton.setMinWidth(100);
+        stopButton.setMinHeight(40);
+        stopButton.setOnAction((actionEvent) -> {
+            try {
+                thread.wait();
+            }
+            catch (Exception e) {
+                System.out.println("xd");
+            }
+        });
+
+        mainBox = new HBox(leftMap, startButton, stopButton);
     }
 
     public void start(Stage primaryStage) {
         initScene();
 
-        engine.run();
         Scene scene = new Scene(mainBox, 1000, 750);
         primaryStage.setScene(scene);
         primaryStage.show();
-        initScene();
     }
 
 }

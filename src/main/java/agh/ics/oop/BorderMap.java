@@ -7,8 +7,9 @@ public class BorderMap implements IWorldMap {
     final int width;
     final int height;
     final int jungleRatio;
-    final int jungleWidth;
-    final Vector2d jungleCorner;
+    final int jungleLenght;
+    final Vector2d jungleLeftCorner;
+    final Vector2d jungleRightCorner;
     final Random rand = new Random();
 
     private final List<Animal> animals = new ArrayList<>();
@@ -21,10 +22,11 @@ public class BorderMap implements IWorldMap {
         this.jungleRatio = jungleRatio;
 
         double mapArea = width*height;
-        this.jungleWidth = (int) Math.floor(Math.sqrt(mapArea/jungleRatio));
-        int jungleCornerX = Math.floorDiv(this.width - this.jungleWidth, 2);
-        int jungleCornerY = Math.floorDiv(this.height - this.jungleWidth, 2);
-        this.jungleCorner = new Vector2d(jungleCornerX, jungleCornerY);
+        this.jungleLenght = (int) Math.floor(Math.sqrt(mapArea/jungleRatio));
+        int jungleCornerX = Math.floorDiv(this.width - this.jungleLenght, 2);
+        int jungleCornerY = Math.floorDiv(this.height - this.jungleLenght, 2);
+        this.jungleLeftCorner = new Vector2d(jungleCornerX, jungleCornerY);
+        this.jungleRightCorner = jungleLeftCorner.add(new Vector2d(jungleLenght, jungleLenght));
 
         for (int x = 0; x < this.width; x++) {
             for (int y = 0; y < this.height; y++) {
@@ -85,8 +87,8 @@ public class BorderMap implements IWorldMap {
         Vector2d stepPlantPos;
 
         int cnt = 0;
-        while (cnt < jungleWidth*jungleWidth) {
-            junglePlantPos = jungleCorner.add(randomPosition(jungleWidth, jungleWidth));
+        while (cnt < jungleLenght * jungleLenght) {
+            junglePlantPos = jungleLeftCorner.add(randomPosition(jungleLenght, jungleLenght));
             if (!cells.get(junglePlantPos).plantExist()) {
                 cells.get(junglePlantPos).putPlant();
                 break;
@@ -108,5 +110,13 @@ public class BorderMap implements IWorldMap {
         int x = rand.nextInt(widthBound);
         int y = rand.nextInt(heightBound);
         return new Vector2d(x, y);
+    }
+
+    public Vector2d getJungleLeftCorner() {
+        return jungleLeftCorner;
+    }
+
+    public Vector2d getJungleRightCorner() {
+        return jungleRightCorner;
     }
 }

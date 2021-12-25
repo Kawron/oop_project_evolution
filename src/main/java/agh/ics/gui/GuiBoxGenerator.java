@@ -2,14 +2,18 @@ package agh.ics.gui;
 
 import agh.ics.oop.Animal;
 import agh.ics.oop.IMapCell;
+import agh.ics.oop.IWorldMap;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 
 import java.io.FileInputStream;
 
 public class GuiBoxGenerator {
 
+    IWorldMap map;
     VBox vbox;
     private Image up;
     private Image down;
@@ -17,7 +21,8 @@ public class GuiBoxGenerator {
     private Image right;
     private Image plant;
 
-    public GuiBoxGenerator() {
+    public GuiBoxGenerator(IWorldMap map) {
+        this.map = map;
         try {
             up = new Image(new FileInputStream("src/main/resources/up.png"));
             down = new Image(new FileInputStream("src/main/resources/down.png"));
@@ -31,12 +36,6 @@ public class GuiBoxGenerator {
     }
 
     private Image getImage(IMapCell cell) {
-        if (cell.getStrongest() == null && cell.plantExist()) {
-            return plant;
-        }
-        else if (cell.getStrongest() == null) {
-            return null;
-        }
         Animal pet = cell.getStrongest();
         return switch (pet.getDirection()) {
             case NORTH, NORTH_EAST -> up;
@@ -47,11 +46,21 @@ public class GuiBoxGenerator {
     }
 
     public VBox getVBox(IMapCell cell) {
+        if (cell.getStrongest() == null && cell.plantExist()) {
+            ImageView view = new ImageView(plant);
+            view.setFitWidth(14);
+            view.setFitHeight(14);
+            return vbox = new VBox(view);
+        }
+        else if (cell.getStrongest() == null) {
+            return vbox = new VBox();
+        }
         ImageView view = new ImageView(this.getImage(cell));
-        view.setFitWidth(20);
-        view.setFitHeight(20);
-        vbox = new VBox();
-        vbox.getChildren().add(view);
-        return vbox;
+        view.setFitWidth(14);
+        view.setFitHeight(14);
+
+        Label energyLevel = new Label(String.valueOf(cell.getStrongest().getEnergy()));
+        energyLevel.setFont(Font.font("Cambria", 10));
+        return vbox = new VBox(view, energyLevel);
     }
 }
