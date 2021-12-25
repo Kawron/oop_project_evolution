@@ -19,6 +19,7 @@ public class TaskManager implements ITaskManager {
         this.cells = map.getCells();
     }
 
+    // imo to powinno być w mapie
     private void getData() {
         animals = map.getAnimals();
         validPositions = animals.entrySet()
@@ -39,7 +40,6 @@ public class TaskManager implements ITaskManager {
         getData();
 
         for (Vector2d position : validPositions) {
-            IMapCell cell = cells.get(position);
             cells.get(position).buryAnimals();
         }
     }
@@ -60,6 +60,7 @@ public class TaskManager implements ITaskManager {
 
         getData();
 
+        // tutaj grubo zle
         for (Vector2d cellPosition : validPositions) {
             for (Animal pet : animals.get(cellPosition)) {
                 gene = pet.getRandomGene();
@@ -74,7 +75,7 @@ public class TaskManager implements ITaskManager {
                         }
                         break;
                     case 4:
-                        if (map.canMove(position.subtract(direction.toUnitVector()))) {
+                        if (map.canMove(position.add(direction.toUnitVector().opposite()))) {
                             animalStack.push(pet);
                             geneStack.push(gene);
                         }

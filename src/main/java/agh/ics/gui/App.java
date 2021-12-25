@@ -1,19 +1,23 @@
 package agh.ics.gui;
 
-import agh.ics.oop.BorderMap;
-import agh.ics.oop.ISimulationEngine;
-import agh.ics.oop.IWorldMap;
-import agh.ics.oop.SimulationEngine;
+import agh.ics.oop.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class App extends Application {
 
     IWorldMap map = new BorderMap(20,30,2);
-    ISimulationEngine engine;
+    ISimulationEngine engine = new SimulationEngine(100, map);
+    GuiBoxGenerator generator = new GuiBoxGenerator();
 
     HBox mainBox;
     GridPane leftMap;
@@ -24,8 +28,8 @@ public class App extends Application {
     int maxHeight = 60;
 
     public void initOptions() {
-        map = new BorderMap(20, 50, 2);
-        engine = new SimulationEngine(10);
+//        map = new BorderMap(20, 50, 2);
+//        engine = new SimulationEngine(10);
     }
 
     private void updateGrid(GridPane pane) {
@@ -49,19 +53,39 @@ public class App extends Application {
         }
         cnt = 1;
         for (int i = 0; i < map.getHeight(); i++) {
-            System.out.println(map.getHeight());
             pane.add(new Label(String.valueOf(i)), 0, cnt,1,1);
             pane.getRowConstraints().add(rowConstraints);
             cnt ++;
+        }
+
+        HashMap<Vector2d, List<Animal>> animals = map.getAnimals();
+        List<Vector2d> validPositions = animals.entrySet()
+                .stream()
+                .filter(x -> x.getValue().size() > 0)
+                .map(Map.Entry::getKey).collect(Collectors.toList());
+
+        System.out.println(validPositions);
+        for (Vector2d position : validPositions) {
+            IMapCell cell = map.getCells().get(position);
+            VBox node = generator.getVBox(cell);
+            pane.add(node, position.x+1,map.getHeight()-position.y+1,1,1);
         }
         pane.setGridLinesVisible(true);
     }
 
     public void initScene() {
+        engine.run();
         leftMap = new GridPane();
         updateGrid(leftMap);
 
-        mainBox = new HBox(leftMap);
+        Button startButton = new Button("Start");
+        startButton.setMinWidth(100);
+        startButton.setMinHeight(40);
+        startButton.setOnAction((event -> {
+            System.out.println("przycisk dziala");
+        }));
+
+        mainBox = new HBox(leftMap, startButton);
     }
 
     public void start(Stage primaryStage) {

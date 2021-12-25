@@ -11,8 +11,10 @@ public class BorderMap implements IWorldMap {
     final Vector2d jungleCorner;
     final Random rand = new Random();
 
-    private final HashMap<Vector2d, List<Animal>> animals = new HashMap<>();
+    private final List<Animal> animals = new ArrayList<>();
+    private final HashMap<Vector2d, List<Animal>> animalsOnCells = new HashMap<>();
     private final HashMap<Vector2d, IMapCell> cells = new HashMap<>();
+    private final HashMap<Vector2d, IMapCell> cellsWithPlants = new HashMap<>();
 
     public BorderMap(int width, int height, int jungleRatio){
         this.width = width;
@@ -36,17 +38,19 @@ public class BorderMap implements IWorldMap {
 
     public void placeAnimal(Animal pet) {
         Vector2d position = pet.getPosition();
-        List<Animal> petList = animals.computeIfAbsent(position, k -> new ArrayList<>());
-
+        List<Animal> petList = animalsOnCells.computeIfAbsent(position, k -> new ArrayList<>());
         petList.add(pet);
+
+        animals.add(pet);
+
         pet.addObserver(this);
     }
 
     public void positionChanged(Animal pet, Vector2d oldPosition, Vector2d newPosition) {
-        List<Animal> petList = animals.get(oldPosition);
+        List<Animal> petList = animalsOnCells.get(oldPosition);
         petList.remove(pet);
 
-        petList = animals.computeIfAbsent(newPosition, k -> new ArrayList<>());
+        petList = animalsOnCells.computeIfAbsent(newPosition, k -> new ArrayList<>());
         petList.add(pet);
     }
 
@@ -54,51 +58,26 @@ public class BorderMap implements IWorldMap {
         return position.x < width && position.x >= 0 && position.y < height && position.y >= 0;
     }
 
-    public void animalDied(IMapCell cell, Animal animal) {
-        animals.get(cell.getPosition()).remove(animal);
+    public void animalDied(IMapCell cell, Animal pet) {
+        animalsOnCells.get(cell.getPosition()).remove(pet);
+        animals.remove(pet);
     }
 
-    public void animalBorn(IMapCell cell, Animal animal) {
-        animals.get(cell.getPosition()).add(animal);
+    public void animalBorn(IMapCell cell, Animal pet) {
+        animalsOnCells.get(cell.getPosition()).add(pet);
+        animals.add(pet);
     }
 
     public List<Animal> getAnimalsOnCell(IMapCell cell) {
-        if (animals.get(cell.getPosition()) == null) System.out.println("kurwa");
-        return animals.get(cell.getPosition());
+        return animalsOnCells.get(cell.getPosition());
     }
 
     public HashMap<Vector2d, IMapCell> getCells() {
         return cells;
     }
 
-    public HashMap<Vector2d, List<Animal>> getAnimals() {
+    public List<Animal> getAnimals() {
         return animals;
-    }
-
-    public void putPlants() {
-        Vector2d junglePlantPos;
-        Vector2d stepPlantPos;
-
-        while (true) {
-            junglePlantPos = jungleCorner.add(randomPosition(jungleWidth, jungleWidth));
-            if (!cells.get(junglePlantPos).plantExist()) {
-                cells.get(junglePlantPos).putPlant();
-                break;
-            }
-        }
-        while (true) {
-            stepPlantPos = randomPosition(width, height);
-            if (!cells.get(stepPlantPos).plantExist()) {
-                cells.get(stepPlantPos).putPlant();
-                break;
-            }
-        }
-    }
-
-    private Vector2d randomPosition(int widthBound, int heightBound) {
-        int x = rand.nextInt(widthBound);
-        int y = rand.nextInt(heightBound);
-        return new Vector2d(x, y);
     }
 
     public int getWidth() {
@@ -107,5 +86,36 @@ public class BorderMap implements IWorldMap {
 
     public int getHeight() {
         return height;
+    }
+
+    // to wg powinoo zostać poprawione bo działa słabo
+    public void putPlants() {
+        Vector2d junglePlantPos;
+        Vector2d stepPlantPos;
+
+        int cnt = 0;
+        while (cnt < jungleWidth*jungleWidth) {
+            junglePlantPos = jungleCorner.add(randomPosition(jungleWidth, jungleWidth));
+            if (!cells.get(junglePlantPos).plantExist()) {
+                cells.get(junglePlantPos).putPlant();
+                break;
+            }
+            cnt++;
+        }
+        cnt = 0;
+        while (cnt < width*height) {
+            stepPlantPos = randomPosition(width, height);
+            if (!cells.get(stepPlantPos).plantExist()) {
+                cells.get(stepPlantPos).putPlant();
+                break;
+            }
+            cnt++;
+        }
+    }
+
+    private Vector2d randomPosition(int widthBound, int heightBound) {
+        int x = rand.nextInt(widthBound);
+        int y = rand.nextInt(heightBound);
+        return new Vector2d(x, y);
     }
 }

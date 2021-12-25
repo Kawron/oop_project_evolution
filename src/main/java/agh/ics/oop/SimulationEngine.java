@@ -8,12 +8,14 @@ import java.util.stream.Collectors;
 
 public class SimulationEngine implements ISimulationEngine{
 
-    BorderMap map = new BorderMap(2000, 2000, 10);
+    IWorldMap map;
+    final ITaskManager manager;
     private Random rand = new Random();
-    private int startingEnergy = 10;
-    final ITaskManager manager = new TaskManager(map, this);
+    private int startingEnergy = 10000;
 
-    public SimulationEngine(int numOfAnimals) {
+    public SimulationEngine(int numOfAnimals, IWorldMap map) {
+        this.map = map;
+        this.manager = new TaskManager(map, this);
         for (int i = 0; i < numOfAnimals; i++) {
             Animal pet = new Animal(randomPosition(), null, startingEnergy);
             map.placeAnimal(pet);
@@ -31,30 +33,24 @@ public class SimulationEngine implements ISimulationEngine{
          */
         long startTime;
         long endTime;
-        while (day < 1_000) {
+        while (day < 900) {
             startTime = System.nanoTime();
-//            System.out.println(day);
             manager.buryAnimals();
-//            System.out.println("Done bury");
             manager.moveAnimals();
-//            System.out.println("Done move");
             manager.feedAnimals();
-//            System.out.println("Done feed");
             manager.breedAnimals();
-//            System.out.println("Done breed");
             map.putPlants();
-//            System.out.println("Done planting");
-//            System.out.println("-----------------------");
             day++;
-//            endTime = System.nanoTime();
-//            System.out.println(endTime-startTime);
+            endTime = System.nanoTime();
+            System.out.println(endTime-startTime);
+            System.out.println(day);
         }
         System.out.println("Done");
     }
 
     private Vector2d randomPosition() {
-        int x = rand.nextInt(map.width);
-        int y = rand.nextInt(map.height);
+        int x = rand.nextInt(map.getWidth());
+        int y = rand.nextInt(map.getHeight());
         if (x < 0 || y < 0) System.out.println("XD?");
         return new Vector2d(x, y);
     }

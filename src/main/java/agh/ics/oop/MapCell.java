@@ -58,7 +58,7 @@ public class MapCell implements IMapCell {
         Collections.sort(genes);
 
         Animal child = new Animal(position, genes, childEnergy);
-        map.animalBorn(this, child);
+        animals.add(child);
     }
 
     public void eatPlant() {
@@ -85,8 +85,6 @@ public class MapCell implements IMapCell {
             if (pet.getEnergy() < 0) {
                 pet.removeObserver(map);
                 animalStack.push(pet);
-//                animals.remove(pet);
-//                map.animalDied(this, pet);
             }
         }
         while (!animalStack.isEmpty()) {
