@@ -13,7 +13,6 @@ import java.io.FileInputStream;
 
 public class GuiBoxGenerator {
 
-    IWorldMap map;
     VBox vbox;
     private Image up;
     private Image down;
@@ -21,8 +20,7 @@ public class GuiBoxGenerator {
     private Image right;
     private Image plant;
 
-    public GuiBoxGenerator(IWorldMap map) {
-        this.map = map;
+    public GuiBoxGenerator() {
         try {
             up = new Image(new FileInputStream("src/main/resources/up.png"));
             down = new Image(new FileInputStream("src/main/resources/down.png"));

@@ -8,8 +8,10 @@ public class Animal {
     private MapDirection direction;
     private List<Integer> genes = new ArrayList<>();
     private List<IMoveObserver> observerList = new ArrayList<>();
+    private IWorldMap map;
 
-    public Animal(Vector2d position, List<Integer> genes, int energy){
+    public Animal(Vector2d position, List<Integer> genes, int energy, IWorldMap map){
+        this.map = map;
         this.energy = energy;
         this.position = position;
         this.direction = MapDirection.NORTH;
@@ -54,10 +56,12 @@ public class Animal {
         switch (gene) {
             case 0 -> {
                 position = position.add(direction.toUnitVector());
+                position = position.getModuloVector(map.getWidth(), map.getHeight());
                 notifyObservers(oldPosition, position);
             }
             case 4 -> {
                 position = position.subtract(direction.toUnitVector());
+                position = position.getModuloVector(map.getWidth(), map.getHeight());
                 notifyObservers(oldPosition, position);
             }
             default -> direction = direction.turnRight(gene);

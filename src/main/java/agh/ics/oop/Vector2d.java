@@ -39,6 +39,13 @@ public class Vector2d {
         return new Vector2d(this.x-other.x, this.y-other.y);
     }
 
+    public Vector2d getModuloVector(int mod_x, int mod_y) {
+        int new_x = Math.floorMod(this.x, mod_x);
+        int new_y = Math.floorMod(this.y, mod_y);
+        Vector2d moduloNewVector = new Vector2d(new_x, new_y);
+        return moduloNewVector;
+    }
+
     @Override
     public boolean equals(Object other){
         if (this == other) return true;

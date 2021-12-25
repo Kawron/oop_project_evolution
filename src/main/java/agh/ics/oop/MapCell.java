@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 public class MapCell implements IMapCell {
     final Vector2d position;
-    final BorderMap map;
+    final IWorldMap map;
     public List<Animal> animals = new ArrayList<>();
     private Stack<Animal> animalsToRemove = new Stack<>();
 
@@ -13,7 +13,7 @@ public class MapCell implements IMapCell {
     final int plantEnergy = 15;
     final int energyToBreed = 100;
 
-    public MapCell(Vector2d position, BorderMap map){
+    public MapCell(Vector2d position, IWorldMap map){
         this.position = position;
         this.map = map;
     }
@@ -62,7 +62,7 @@ public class MapCell implements IMapCell {
         genes.addAll(weakGenes);
         Collections.sort(genes);
 
-        Animal child = new Animal(position, genes, childEnergy);
+        Animal child = new Animal(position, genes, childEnergy, map);
         animals.add(child);
         map.animalBorn(child);
     }

@@ -2,11 +2,7 @@ package agh.ics.oop;
 
 import agh.ics.gui.App;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class SimulationEngine implements ISimulationEngine{
 
@@ -21,7 +17,7 @@ public class SimulationEngine implements ISimulationEngine{
         this.map = map;
         this.manager = new TaskManager(map, this);
         for (int i = 0; i < numOfAnimals; i++) {
-            Animal pet = new Animal(randomPosition(), null, startingEnergy);
+            Animal pet = new Animal(randomPosition(), null, startingEnergy, map);
             map.placeAnimal(pet);
         }
     }
@@ -37,9 +33,18 @@ public class SimulationEngine implements ISimulationEngine{
          */
         long startTime;
         long endTime;
+
         while (map.getAnimals().size() > 0) {
+            while (gui.shouldIWork(map)) {
+                try {
+                    Thread.sleep(100);
+                }
+                catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
             try {
-                Thread.sleep(20);
+                Thread.sleep(16);
                 startTime = System.nanoTime();
                 manager.buryAnimals();
                 manager.moveAnimals();
@@ -51,13 +56,14 @@ public class SimulationEngine implements ISimulationEngine{
 //            System.out.println(endTime-startTime);
 //                System.out.println(day);
 //                System.out.println(map.getAnimals().size());
-                gui.renderNextDay();
+                // jak ktoś chce to można day % x = 0 i jest co x dni
+                gui.renderNextDay(map);
             }
             catch (Exception e) {
-                System.out.println("Zepsulo sie");
+                System.out.println(e);
             }
         }
-        System.out.println(day);
+//        System.out.println(day);
     }
 
     private Vector2d randomPosition() {
