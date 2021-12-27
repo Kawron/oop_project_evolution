@@ -22,24 +22,21 @@ import java.util.TimerTask;
 
 public class App extends Application {
 
-    IWorldMap borderMap = new WorldMap(11,10,2);
+    IWorldMap borderMap = new WorldMap(10,10,2);
     ISimulationEngine borderEngine = new SimulationEngine(100, borderMap, this);
     Thread borderThread = null;
 
-    IWorldMap infMap = new BorderlessWorldMap(11,10,2);
+    IWorldMap infMap = new BorderlessWorldMap(10,10,2);
     ISimulationEngine infEngine = new SimulationEngine(100, infMap, this);
     Thread infThread = null;
 
     GuiBoxGenerator generator = new GuiBoxGenerator(this);
     HBox mainBox;
-    VBox selectedAnimal;
+    VBox selectedAnimal = new VBox(new Label("No Animal Chosen"));
     GridPane leftMap;
     GridPane rightMap;
     VBox options;
     Animal theChosenOne = null;
-
-    public boolean leftFlag = false;
-    public boolean rightFlag = false;
 
     int minWidth = 10;
     int minHeight = 10;
@@ -84,11 +81,10 @@ public class App extends Application {
             Vector2d position = cell.getPosition();
 
             StackPane node = generator.getView(cell);
-            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    theChosenOne = cell.getStrongest();
-                }
+            node.setOnMouseClicked(event -> {
+                System.out.println("Choosen Animal");
+                theChosenOne = cell.getStrongest();
+                showDataAboutAnimal();
             });
             pane.add(node, position.x+1, map.getHeight()-position.y,1,1);
         }
@@ -98,6 +94,10 @@ public class App extends Application {
     // imo bezsensu no bo bezsensu no dwie mapy będą co dzień robiły to samo
     public void renderNextDay(IWorldMap map) {
         Platform.runLater(() -> updateMap(map));
+    }
+
+    public void updateData() {
+        Platform.runLater(this::showDataAboutAnimal);
     }
 
     private void updateMap(IWorldMap map) {
@@ -138,22 +138,7 @@ public class App extends Application {
                 infThread = new Thread(() -> infEngine.run());
                 infThread.start();
             }
-//            Thread thread = new Thread(() -> {
-//                while (true) {
-//                    try {
-//                        Thread.sleep(71);
-//                    }
-//                    catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                    finally {
-//                        renderNextDay(borderMap);
-//                        renderNextDay(infMap);
-//                        System.out.println("dadaldadsklj");
-//                    }
-//                }
-//            });
-//            thread.start();
+            System.out.println("Start All");
         });
 
         Button stopAll = new Button("Stop Simulation");
@@ -162,6 +147,7 @@ public class App extends Application {
         stopAll.setOnAction((actionEvent) -> {
             infEngine.stopResume();
             borderEngine.stopResume();
+            System.out.println("Stop All");
         });
 
         Button saveBorder = new Button("Save Border Simulation to CSV");
@@ -172,30 +158,33 @@ public class App extends Application {
         });
 
         Button saveInf= new Button("Save Borderless Simulation to CSV");
-        saveBorder.setMinWidth(100);
-        saveBorder.setMinHeight(40);
-        saveBorder.setOnAction((actionEvent) -> {
+        saveInf.setMinWidth(100);
+        saveInf.setMinHeight(40);
+        saveInf.setOnAction((actionEvent) -> {
             System.out.println("saveInf");
         });
 
         Button stopResumeBorder = new Button("stop/Resume");
-        saveBorder.setMinWidth(100);
-        saveBorder.setMinHeight(40);
-        saveBorder.setOnAction((actionEvent) -> {
+        stopResumeBorder.setMinWidth(100);
+        stopResumeBorder.setMinHeight(40);
+        stopResumeBorder.setOnAction((actionEvent) -> {
             borderEngine.stopResume();
+            System.out.println("stopResumeBorder");
         });
 
         Button stopResumeInf = new Button("stop/Resume");
-        saveBorder.setMinWidth(100);
-        saveBorder.setMinHeight(40);
-        saveBorder.setOnAction((actionEvent) -> {
+        stopResumeInf.setMinWidth(100);
+        stopResumeInf.setMinHeight(40);
+        stopResumeInf.setOnAction((actionEvent) -> {
             infEngine.stopResume();
+            System.out.println("stopResumeInf");
         });
 
         Button startBorder = new Button("Start");
-        saveBorder.setMinWidth(100);
-        saveBorder.setMinHeight(40);
-        saveBorder.setOnAction((actionEvent) -> {
+        startBorder.setMinWidth(100);
+        startBorder.setMinHeight(40);
+        startBorder.setOnAction((actionEvent) -> {
+            System.out.println("start BORDER");
             if (borderThread == null) {
                 borderThread = new Thread(() -> borderEngine.run());
                 borderThread.start();
@@ -203,9 +192,10 @@ public class App extends Application {
         });
 
         Button startInf = new Button("Start");
-        saveBorder.setMinWidth(100);
-        saveBorder.setMinHeight(40);
-        saveBorder.setOnAction((actionEvent) -> {
+        startInf.setMinWidth(100);
+        startInf.setMinHeight(40);
+        startInf.setOnAction((actionEvent) -> {
+            System.out.println("startInf");
             if (infThread == null) {
                 infThread = new Thread(() -> infEngine.run());
                 infThread.start();
@@ -214,17 +204,15 @@ public class App extends Application {
 
         VBox borderVbox = new VBox(new Label("Border Simulation"), stopResumeBorder, startBorder);
         VBox infVbox = new VBox(new Label("Borderless Simulation"), stopResumeInf, startInf);
-        HBox stopResumeHbox = new HBox(infVbox, borderVbox);
+        HBox hbox = new HBox(infVbox, borderVbox);
 
-        return new VBox(startAll, stopAll, saveBorder, saveInf, stopResumeHbox);
-    }
-
-    public VBox initChosenAnimal() {
-        return new VBox(new Label("testLabel"));
+        // dodać speed
+        return new VBox(startAll, stopAll, saveBorder, saveInf, hbox);
     }
 
     public HBox initScene() {
-        VBox options = new VBox(initButtonsView(), initChosenAnimal());
+        showDataAboutAnimal();
+        VBox options = new VBox(initButtonsView(), selectedAnimal);
         VBox maps = new VBox(initMapView(), initGraphConsole());
         return new HBox(options, maps);
     }
@@ -238,13 +226,19 @@ public class App extends Application {
     }
 
     public void showDataAboutAnimal() {
-        Animal pet = null;
         selectedAnimal.getChildren().clear();
+        Animal pet = theChosenOne;
 
+        if (pet == null) {
+            Label info = new Label("No Animal Chosen");
+            selectedAnimal.getChildren().add(info);
+            return;
+        }
+//
         Label genesLabel = new Label("Genes of animal");
         Label genes = new Label(pet.printGenes());
         selectedAnimal.getChildren().add(genes);
-
+//
         Label deathMsg;
         if (pet.deathDay < 0) {
             deathMsg = new Label("Animal is still alive");
@@ -254,7 +248,11 @@ public class App extends Application {
         }
         selectedAnimal.getChildren().add(deathMsg);
 
-        System.out.println(pet.countChildren(pet));
-        System.out.println(pet.countDescendants(pet));
+        Label childCount = new Label(String.format("The number of children: %d", pet.countChildren(pet)));
+        Label descendant = new Label(String.format("The number of children: %d", pet.countDescendants(pet)));
+        selectedAnimal.getChildren().add(childCount);
+        selectedAnimal.getChildren().add(descendant);
+//        System.out.println(pet.countChildren(pet));
+//        System.out.println(pet.countDescendants(pet));
     }
 }

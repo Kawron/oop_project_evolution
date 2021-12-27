@@ -41,7 +41,7 @@ public class SimulationEngine implements ISimulationEngine{
                 }
             }
             try {
-                Thread.sleep(16);
+                Thread.sleep(100);
                 startTime = System.nanoTime();
                 manager.buryAnimals();
                 manager.moveAnimals();
@@ -54,7 +54,8 @@ public class SimulationEngine implements ISimulationEngine{
 //                System.out.println(day);
 //                System.out.println(map.getAnimals().size());
                 // jak ktoś chce to można day % x = 0 i jest co x dni
-//                gui.renderNextDay(map);
+                gui.renderNextDay(map);
+                gui.updateData();
                 map.nextDay();
             }
             catch (Exception e) {
