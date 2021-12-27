@@ -1,14 +1,24 @@
 package agh.ics.gui;
 
 import agh.ics.oop.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class App extends Application {
 
@@ -26,6 +36,7 @@ public class App extends Application {
     GridPane leftMap;
     GridPane rightMap;
     VBox options;
+    Animal theChosenOne = null;
 
     public boolean leftFlag = false;
     public boolean rightFlag = false;
@@ -67,17 +78,24 @@ public class App extends Application {
         }
 
         // można zrobic hashmape z roslinam i zwierzakami
-        System.out.println(map.getAnimals().size());
+//        System.out.println(map.getAnimals().size());
 
         for (IMapCell cell : map.getCells().values()) {
             Vector2d position = cell.getPosition();
 
-            VBox node = generator.getVBox(cell);
+            StackPane node = generator.getView(cell);
+            node.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    theChosenOne = cell.getStrongest();
+                }
+            });
             pane.add(node, position.x+1, map.getHeight()-position.y,1,1);
         }
         pane.setGridLinesVisible(true);
     }
 
+    // imo bezsensu no bo bezsensu no dwie mapy będą co dzień robiły to samo
     public void renderNextDay(IWorldMap map) {
         Platform.runLater(() -> updateMap(map));
     }
@@ -87,81 +105,140 @@ public class App extends Application {
         else updateGrid(leftMap, map);
     }
 
-    public HBox initScene() {
+    public HBox initMapView() {
         leftMap = new GridPane();
         leftMap.maxWidth(400);
         leftMap.minWidth(400);
         updateGrid(leftMap, infMap);
 
-        Button leftStartButton = new Button("Start");
-        leftStartButton.setMinWidth(100);
-        leftStartButton.setMinHeight(40);
-        leftStartButton.setOnAction((actionEvent) -> {
-            if (infThread == null) {
-                infThread = new Thread(() -> infEngine.run());
-                infThread.start();
-            }
-        });
-
-        Button leftStopButton = new Button("Stop/Resume");
-        leftStopButton.setMinWidth(100);
-        leftStopButton.setMinHeight(40);
-        leftStopButton.setOnAction((actionEvent) -> {
-            infEngine.stopResume();
-        });
-
-        VBox leftDiv = new VBox(leftMap, leftStartButton, leftStopButton);
-        // right Div
         rightMap = new GridPane();
         rightMap.maxWidth(400);
         rightMap.minWidth(400);
         updateGrid(rightMap, borderMap);
 
-        Button rightStartButton = new Button("Start");
-        rightStartButton.setMinWidth(100);
-        rightStartButton.setMinHeight(40);
-        rightStartButton.setOnAction((actionEvent) -> {
+        return new HBox(leftMap, rightMap);
+    }
+
+    public VBox initGraphConsole() {
+        return new VBox(new Label("test"));
+    }
+
+    public VBox initButtonsView() {
+
+        // tu ewidtenie naprawić DRY
+        Button startAll = new Button("Start All Maps");
+        startAll.setMinWidth(100);
+        startAll.setMinHeight(40);
+        startAll.setOnAction((actionEvent) -> {
+            if (borderThread == null) {
+                borderThread = new Thread(() -> borderEngine.run());
+                borderThread.start();
+            }
+            if (infThread == null) {
+                infThread = new Thread(() -> infEngine.run());
+                infThread.start();
+            }
+//            Thread thread = new Thread(() -> {
+//                while (true) {
+//                    try {
+//                        Thread.sleep(71);
+//                    }
+//                    catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                    finally {
+//                        renderNextDay(borderMap);
+//                        renderNextDay(infMap);
+//                        System.out.println("dadaldadsklj");
+//                    }
+//                }
+//            });
+//            thread.start();
+        });
+
+        Button stopAll = new Button("Stop Simulation");
+        stopAll.setMinWidth(100);
+        stopAll.setMinHeight(40);
+        stopAll.setOnAction((actionEvent) -> {
+            infEngine.stopResume();
+            borderEngine.stopResume();
+        });
+
+        Button saveBorder = new Button("Save Border Simulation to CSV");
+        saveBorder.setMinWidth(100);
+        saveBorder.setMinHeight(40);
+        saveBorder.setOnAction((actionEvent) -> {
+            System.out.println("saveBorder");
+        });
+
+        Button saveInf= new Button("Save Borderless Simulation to CSV");
+        saveBorder.setMinWidth(100);
+        saveBorder.setMinHeight(40);
+        saveBorder.setOnAction((actionEvent) -> {
+            System.out.println("saveInf");
+        });
+
+        Button stopResumeBorder = new Button("stop/Resume");
+        saveBorder.setMinWidth(100);
+        saveBorder.setMinHeight(40);
+        saveBorder.setOnAction((actionEvent) -> {
+            borderEngine.stopResume();
+        });
+
+        Button stopResumeInf = new Button("stop/Resume");
+        saveBorder.setMinWidth(100);
+        saveBorder.setMinHeight(40);
+        saveBorder.setOnAction((actionEvent) -> {
+            infEngine.stopResume();
+        });
+
+        Button startBorder = new Button("Start");
+        saveBorder.setMinWidth(100);
+        saveBorder.setMinHeight(40);
+        saveBorder.setOnAction((actionEvent) -> {
             if (borderThread == null) {
                 borderThread = new Thread(() -> borderEngine.run());
                 borderThread.start();
             }
         });
 
-        Button rightStopButton = new Button("Stop/Resume");
-        rightStopButton.setMinWidth(100);
-        rightStopButton.setMinHeight(40);
-        rightStopButton.setOnAction((actionEvent) -> {
-            showDataAboutAnimal();
-            borderEngine.stopResume();
+        Button startInf = new Button("Start");
+        saveBorder.setMinWidth(100);
+        saveBorder.setMinHeight(40);
+        saveBorder.setOnAction((actionEvent) -> {
+            if (infThread == null) {
+                infThread = new Thread(() -> infEngine.run());
+                infThread.start();
+            }
         });
 
-        VBox rightDiv = new VBox(rightMap, rightStartButton, rightStopButton);
+        VBox borderVbox = new VBox(new Label("Border Simulation"), stopResumeBorder, startBorder);
+        VBox infVbox = new VBox(new Label("Borderless Simulation"), stopResumeInf, startInf);
+        HBox stopResumeHbox = new HBox(infVbox, borderVbox);
 
-        // middle div
-        selectedAnimal = new VBox();
-        selectedAnimal.setMinWidth(220);
-        selectedAnimal.setMaxWidth(220);
+        return new VBox(startAll, stopAll, saveBorder, saveInf, stopResumeHbox);
+    }
 
-        HBox hbox = new HBox(leftDiv, selectedAnimal, rightDiv);
-        hbox.setAlignment(Pos.BASELINE_CENTER);
-        hbox.setSpacing(5);
-        return hbox;
+    public VBox initChosenAnimal() {
+        return new VBox(new Label("testLabel"));
+    }
+
+    public HBox initScene() {
+        VBox options = new VBox(initButtonsView(), initChosenAnimal());
+        VBox maps = new VBox(initMapView(), initGraphConsole());
+        return new HBox(options, maps);
     }
 
     public void start(Stage primaryStage) {
         mainBox = initScene();
 
-        Scene scene = new Scene(mainBox, 1200, 750);
+        Scene scene = new Scene(mainBox, 1500, 750);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     public void showDataAboutAnimal() {
-        Animal pet = new Animal(new Vector2d(1,2), null, 10 ,borderMap);
-        Animal child = new Animal(new Vector2d(1,2), null, 10 ,borderMap);
-        pet.addChild(child);
-        Animal grandChild = new Animal(new Vector2d(1,2), null, 10 ,borderMap);
-        child.addChild(grandChild);
+        Animal pet = null;
         selectedAnimal.getChildren().clear();
 
         Label genesLabel = new Label("Genes of animal");

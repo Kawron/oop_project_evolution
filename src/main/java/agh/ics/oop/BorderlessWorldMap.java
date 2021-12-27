@@ -11,7 +11,6 @@ public class BorderlessWorldMap extends AbstractWorldMap {
     public void positionChanged(Animal pet, Vector2d oldPosition, Vector2d newPosition) {
         newPosition = newPosition.getModuloVector(width, height);
 
-        System.out.println(oldPosition);
         IMapCell oldCell = cells.get(oldPosition);
         IMapCell newCell = cells.get(newPosition);
 

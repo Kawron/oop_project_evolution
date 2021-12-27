@@ -7,7 +7,10 @@ import javafx.application.Application;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
 import java.io.FileInputStream;
@@ -46,15 +49,15 @@ public class GuiBoxGenerator {
         };
     }
 
-    public VBox getVBox(IMapCell cell) {
+    public StackPane getView(IMapCell cell) {
         if (cell.getStrongest() == null && cell.plantExist()) {
             ImageView view = new ImageView(plant);
             view.setFitWidth(14);
             view.setFitHeight(14);
-            return vbox = new VBox(view);
+            return new StackPane(new Rectangle(20, 20, Color.GREEN), view);
         }
         else if (cell.getStrongest() == null) {
-            return vbox = new VBox();
+            return new StackPane();
         }
         ImageView view = new ImageView(this.getImage(cell));
         view.setFitWidth(14);
@@ -62,6 +65,8 @@ public class GuiBoxGenerator {
 
         Label energyLevel = new Label(String.valueOf(cell.getStrongest().getEnergy()));
         energyLevel.setFont(Font.font("Cambria", 10));
-        return vbox = new VBox(view, energyLevel);
+
+        StackPane stackPane = new StackPane(new Rectangle(20, 20, Color.BLUE), new VBox(view, energyLevel));
+        return stackPane;
     }
 }

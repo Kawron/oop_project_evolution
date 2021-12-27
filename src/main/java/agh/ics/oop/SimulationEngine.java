@@ -54,7 +54,7 @@ public class SimulationEngine implements ISimulationEngine{
 //                System.out.println(day);
 //                System.out.println(map.getAnimals().size());
                 // jak ktoś chce to można day % x = 0 i jest co x dni
-                gui.renderNextDay(map);
+//                gui.renderNextDay(map);
                 map.nextDay();
             }
             catch (Exception e) {
@@ -74,7 +74,6 @@ public class SimulationEngine implements ISimulationEngine{
     private Vector2d randomPosition() {
         int x = rand.nextInt(map.getWidth());
         int y = rand.nextInt(map.getHeight());
-        if (x < 0 || y < 0) System.out.println("XD?");
         return new Vector2d(x, y);
     }
 }
