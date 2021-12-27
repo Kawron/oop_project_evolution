@@ -9,4 +9,6 @@ public interface ITaskManager {
     void feedAnimals();
 
     void moveAnimals();
+
+    // chyba dodałbym tu jeszcze putPlants
 }

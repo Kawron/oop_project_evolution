@@ -6,10 +6,11 @@ import java.util.stream.Collectors;
 public class MapCell implements IMapCell {
     final Vector2d position;
     final IWorldMap map;
-    public List<Animal> animals = new ArrayList<>();
-    private Stack<Animal> animalsToRemove = new Stack<>();
-
     private Boolean plantExist = false;
+
+    public List<Animal> animals = new ArrayList<>();
+    private final Stack<Animal> animalsToRemove = new Stack<>();
+
     final int plantEnergy = 15;
     final int energyToBreed = 100;
 
@@ -63,8 +64,9 @@ public class MapCell implements IMapCell {
         Collections.sort(genes);
 
         Animal child = new Animal(position, genes, childEnergy, map);
-        animals.add(child);
-        map.animalBorn(child);
+        strongParent.addChild(child);
+        weakParent.addChild(child);
+        map.placeAnimal(child);
     }
 
     public void eatPlant() {
@@ -92,9 +94,8 @@ public class MapCell implements IMapCell {
         while (!animalsToRemove.isEmpty()) {
             petToRemove = animalsToRemove.pop();
             petToRemove.deathDay = map.getDay();
-            petToRemove.removeObserver(map);
             animals.remove(petToRemove);
-            map.animalDied(petToRemove);
+            map.removeAnimal(petToRemove);
         }
     }
 
@@ -107,7 +108,7 @@ public class MapCell implements IMapCell {
     }
 
     public void putPlant() {
-        plantExist = !plantExist;
+        plantExist = true;
     }
 
     public Animal getStrongest() {

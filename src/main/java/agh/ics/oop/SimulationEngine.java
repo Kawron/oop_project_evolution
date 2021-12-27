@@ -9,6 +9,7 @@ public class SimulationEngine implements ISimulationEngine{
     IWorldMap map;
     App gui;
     final ITaskManager manager;
+    private boolean flag = true;
     private Random rand = new Random();
     private int startingEnergy = 100;
 
@@ -29,12 +30,14 @@ public class SimulationEngine implements ISimulationEngine{
         long endTime;
 
         while (map.getAnimals().size() > 0) {
-            while (gui.shouldIWork(map)) {
-                try {
-                    Thread.sleep(100);
-                }
-                catch (Exception e) {
-                    System.out.println(e);
+            synchronized(this) {
+                while(!flag) {
+                    try {
+                        wait();
+                    }
+                    catch (Exception e) {
+                        System.out.println(e);
+                    }
                 }
             }
             try {
@@ -59,6 +62,13 @@ public class SimulationEngine implements ISimulationEngine{
             }
         }
 //        System.out.println(day);
+    }
+
+    public void stopResume() {
+        synchronized(this){
+            flag = !flag;
+            notifyAll();
+        }
     }
 
     private Vector2d randomPosition() {

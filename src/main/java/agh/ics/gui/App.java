@@ -107,7 +107,7 @@ public class App extends Application {
         leftStopButton.setMinWidth(100);
         leftStopButton.setMinHeight(40);
         leftStopButton.setOnAction((actionEvent) -> {
-            this.leftFlag = !this.leftFlag;
+            infEngine.stopResume();
         });
 
         VBox leftDiv = new VBox(leftMap, leftStartButton, leftStopButton);
@@ -132,7 +132,7 @@ public class App extends Application {
         rightStopButton.setMinHeight(40);
         rightStopButton.setOnAction((actionEvent) -> {
             showDataAboutAnimal();
-            this.rightFlag = !this.rightFlag;
+            borderEngine.stopResume();
         });
 
         VBox rightDiv = new VBox(rightMap, rightStartButton, rightStopButton);
@@ -156,13 +156,12 @@ public class App extends Application {
         primaryStage.show();
     }
 
-    public boolean shouldIWork(IWorldMap map) {
-        if (map instanceof WorldMap) return rightFlag;
-        return leftFlag;
-    }
-
     public void showDataAboutAnimal() {
         Animal pet = new Animal(new Vector2d(1,2), null, 10 ,borderMap);
+        Animal child = new Animal(new Vector2d(1,2), null, 10 ,borderMap);
+        pet.addChild(child);
+        Animal grandChild = new Animal(new Vector2d(1,2), null, 10 ,borderMap);
+        child.addChild(grandChild);
         selectedAnimal.getChildren().clear();
 
         Label genesLabel = new Label("Genes of animal");
@@ -178,7 +177,7 @@ public class App extends Application {
         }
         selectedAnimal.getChildren().add(deathMsg);
 
-//        int children = pet.map.countChildren(pet);
-//        int descendants = pet.map.countDescendants(pet);
+        System.out.println(pet.countChildren(pet));
+        System.out.println(pet.countDescendants(pet));
     }
 }

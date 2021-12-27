@@ -68,7 +68,6 @@ public class TaskManager implements ITaskManager {
                     }
                     break;
                 default: pet.move(gene);
-
             }
         }
     }

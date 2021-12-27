@@ -7,9 +7,7 @@ public interface IWorldMap extends IMoveObserver{
 
     void placeAnimal(Animal pet);
 
-    void animalDied(Animal animal);
-
-    void animalBorn(Animal animal);
+    void removeAnimal(Animal animal);
 
     void putPlants();
 
@@ -26,8 +24,4 @@ public interface IWorldMap extends IMoveObserver{
     void nextDay();
 
     int getDay();
-
-    int countChildren(Animal pet);
-
-    int countDescendants(Animal pet);
 }

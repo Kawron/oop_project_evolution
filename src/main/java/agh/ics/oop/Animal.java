@@ -7,11 +7,18 @@ public class Animal {
     private Vector2d position;
     private int energy;
     private MapDirection direction;
-    private List<Integer> genes = new ArrayList<>();
-    private List<IMoveObserver> observerList = new ArrayList<>();
     public IWorldMap map;
 
-    public Animal(Vector2d position, List<Integer> genes, int energy, IWorldMap map){
+    public Animal parent1;
+    public Animal parent2;
+
+    public List<Animal> children = new ArrayList<>();
+
+    private List<Integer> genes = new ArrayList<>();
+    private List<IMoveObserver> observerList = new ArrayList<>();
+
+    // tutaj się będzie działo
+    public Animal(Vector2d position, List<Integer> genes, int energy, IWorldMap map) {
         this.map = map;
         this.energy = energy;
         this.position = position;
@@ -88,6 +95,17 @@ public class Animal {
         return genes.toString();
     }
 
+    public void addChild(Animal child) {
+        children.add(child);
+    }
+
+    public void traverseThroughChildren(Set<Animal> descendants) {
+        for (Animal child : children) {
+            descendants.add(child);
+            child.traverseThroughChildren(descendants);
+        }
+    }
+
     public Vector2d getPosition() {
         return position;
     }
@@ -102,5 +120,15 @@ public class Animal {
 
     public String toString() {
         return String.format("(%d,%d)",position.x, position.y);
+    }
+
+    public int countDescendants(Animal pet) {
+        Set<Animal> descendants = new TreeSet<>(Comparator.comparing(Animal::hashCode));
+        pet.traverseThroughChildren(descendants);
+        return descendants.size();
+    }
+
+    public int countChildren(Animal pet) {
+        return pet.children.size();
     }
 }
