@@ -3,6 +3,7 @@ package agh.ics.gui;
 import agh.ics.oop.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,16 +12,17 @@ import javafx.stage.Stage;
 
 public class App extends Application {
 
-    IWorldMap borderMap = new WorldMap(10,10,2);
+    IWorldMap borderMap = new WorldMap(11,10,2);
     ISimulationEngine borderEngine = new SimulationEngine(100, borderMap, this);
-    Thread borderThread;
+    Thread borderThread = null;
 
-    IWorldMap infMap = new BorderlessWorldMap(10,10,2);
+    IWorldMap infMap = new BorderlessWorldMap(11,10,2);
     ISimulationEngine infEngine = new SimulationEngine(100, infMap, this);
-    Thread infThread;
+    Thread infThread = null;
 
-    GuiBoxGenerator generator = new GuiBoxGenerator();
+    GuiBoxGenerator generator = new GuiBoxGenerator(this);
     HBox mainBox;
+    VBox selectedAnimal;
     GridPane leftMap;
     GridPane rightMap;
     VBox options;
@@ -44,7 +46,7 @@ public class App extends Application {
         pane.getRowConstraints().clear();
         pane.getColumnConstraints().clear();
 
-        int constraint = Math.min((int)300/ map.getWidth(), (int)700/ map.getHeight());
+        int constraint = Math.min((int)450/ map.getWidth(), (int)700/ map.getHeight());
         ColumnConstraints columnConstraints = new ColumnConstraints(constraint);
         RowConstraints rowConstraints = new RowConstraints(constraint);
         pane.getColumnConstraints().add(columnConstraints);
@@ -81,70 +83,102 @@ public class App extends Application {
     }
 
     private void updateMap(IWorldMap map) {
-        System.out.println(leftFlag);
-        System.out.println(rightFlag);
         if (map instanceof WorldMap) updateGrid(rightMap, map);
         else updateGrid(leftMap, map);
     }
 
     public HBox initScene() {
         leftMap = new GridPane();
+        leftMap.maxWidth(400);
+        leftMap.minWidth(400);
         updateGrid(leftMap, infMap);
 
         Button leftStartButton = new Button("Start");
         leftStartButton.setMinWidth(100);
         leftStartButton.setMinHeight(40);
         leftStartButton.setOnAction((actionEvent) -> {
-            infThread = new Thread(() -> infEngine.run());
-            infThread.start();
+            if (infThread == null) {
+                infThread = new Thread(() -> infEngine.run());
+                infThread.start();
+            }
         });
 
-        Button leftStopButton = new Button("Stop");
+        Button leftStopButton = new Button("Stop/Resume");
         leftStopButton.setMinWidth(100);
         leftStopButton.setMinHeight(40);
         leftStopButton.setOnAction((actionEvent) -> {
-            this.leftFlag = true;
+            this.leftFlag = !this.leftFlag;
         });
 
         VBox leftDiv = new VBox(leftMap, leftStartButton, leftStopButton);
         // right Div
         rightMap = new GridPane();
+        rightMap.maxWidth(400);
+        rightMap.minWidth(400);
         updateGrid(rightMap, borderMap);
 
         Button rightStartButton = new Button("Start");
         rightStartButton.setMinWidth(100);
         rightStartButton.setMinHeight(40);
         rightStartButton.setOnAction((actionEvent) -> {
-            borderThread = new Thread(() -> borderEngine.run());
-            borderThread.start();
+            if (borderThread == null) {
+                borderThread = new Thread(() -> borderEngine.run());
+                borderThread.start();
+            }
         });
 
-        Button rightStopButton = new Button("Stop");
+        Button rightStopButton = new Button("Stop/Resume");
         rightStopButton.setMinWidth(100);
         rightStopButton.setMinHeight(40);
         rightStopButton.setOnAction((actionEvent) -> {
-            this.rightFlag = true;
+            showDataAboutAnimal();
+            this.rightFlag = !this.rightFlag;
         });
 
         VBox rightDiv = new VBox(rightMap, rightStartButton, rightStopButton);
 
-        return new HBox(leftDiv, rightDiv);
+        // middle div
+        selectedAnimal = new VBox();
+        selectedAnimal.setMinWidth(220);
+        selectedAnimal.setMaxWidth(220);
+
+        HBox hbox = new HBox(leftDiv, selectedAnimal, rightDiv);
+        hbox.setAlignment(Pos.BASELINE_CENTER);
+        hbox.setSpacing(5);
+        return hbox;
     }
 
     public void start(Stage primaryStage) {
-        HBox mainBox = initScene();
+        mainBox = initScene();
 
-        Scene scene = new Scene(mainBox, 1000, 750);
+        Scene scene = new Scene(mainBox, 1200, 750);
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-    private void stopSimulations(boolean value) {
-        value = !value;
     }
 
     public boolean shouldIWork(IWorldMap map) {
         if (map instanceof WorldMap) return rightFlag;
         return leftFlag;
+    }
+
+    public void showDataAboutAnimal() {
+        Animal pet = new Animal(new Vector2d(1,2), null, 10 ,borderMap);
+        selectedAnimal.getChildren().clear();
+
+        Label genesLabel = new Label("Genes of animal");
+        Label genes = new Label(pet.printGenes());
+        selectedAnimal.getChildren().add(genes);
+
+        Label deathMsg;
+        if (pet.deathDay < 0) {
+            deathMsg = new Label("Animal is still alive");
+        }
+        else {
+            deathMsg = new Label(String.format("The animal died on %d day", pet.deathDay));
+        }
+        selectedAnimal.getChildren().add(deathMsg);
+
+//        int children = pet.map.countChildren(pet);
+//        int descendants = pet.map.countDescendants(pet);
     }
 }

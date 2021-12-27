@@ -4,6 +4,7 @@ import java.util.*;
 
 public class WorldMap implements IWorldMap {
 
+    private int day;
     final int width;
     final int height;
     final int jungleRatio;
@@ -109,6 +110,14 @@ public class WorldMap implements IWorldMap {
         int x = rand.nextInt(widthBound);
         int y = rand.nextInt(heightBound);
         return new Vector2d(x, y);
+    }
+
+    public void nextDay() {
+        day ++;
+    }
+
+    public int getDay() {
+        return day;
     }
 
     public Vector2d getJungleLeftCorner() {

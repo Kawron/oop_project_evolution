@@ -24,13 +24,7 @@ public class SimulationEngine implements ISimulationEngine{
 
     public void run() {
         int day = 0;
-        /*
-        1.Delete dead animals
-        2.Move animals
-        3.Eating
-        4.Breeding
-        5.Plant plants
-         */
+
         long startTime;
         long endTime;
 
@@ -58,6 +52,7 @@ public class SimulationEngine implements ISimulationEngine{
 //                System.out.println(map.getAnimals().size());
                 // jak ktoś chce to można day % x = 0 i jest co x dni
                 gui.renderNextDay(map);
+                map.nextDay();
             }
             catch (Exception e) {
                 System.out.println(e);

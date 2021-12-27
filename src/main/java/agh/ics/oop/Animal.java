@@ -3,12 +3,13 @@ package agh.ics.oop;
 import java.util.*;
 
 public class Animal {
+    public int deathDay = -1;
     private Vector2d position;
     private int energy;
     private MapDirection direction;
     private List<Integer> genes = new ArrayList<>();
     private List<IMoveObserver> observerList = new ArrayList<>();
-    private IWorldMap map;
+    public IWorldMap map;
 
     public Animal(Vector2d position, List<Integer> genes, int energy, IWorldMap map){
         this.map = map;

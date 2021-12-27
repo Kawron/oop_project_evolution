@@ -91,6 +91,7 @@ public class MapCell implements IMapCell {
         Animal petToRemove;
         while (!animalsToRemove.isEmpty()) {
             petToRemove = animalsToRemove.pop();
+            petToRemove.deathDay = map.getDay();
             petToRemove.removeObserver(map);
             animals.remove(petToRemove);
             map.animalDied(petToRemove);

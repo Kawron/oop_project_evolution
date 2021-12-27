@@ -22,4 +22,12 @@ public interface IWorldMap extends IMoveObserver{
     int getWidth();
 
     int getHeight();
+
+    void nextDay();
+
+    int getDay();
+
+    int countChildren(Animal pet);
+
+    int countDescendants(Animal pet);
 }

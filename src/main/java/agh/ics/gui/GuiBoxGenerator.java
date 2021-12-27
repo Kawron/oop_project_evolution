@@ -3,6 +3,7 @@ package agh.ics.gui;
 import agh.ics.oop.Animal;
 import agh.ics.oop.IMapCell;
 import agh.ics.oop.IWorldMap;
+import javafx.application.Application;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -13,6 +14,7 @@ import java.io.FileInputStream;
 
 public class GuiBoxGenerator {
 
+    Application app;
     VBox vbox;
     private Image up;
     private Image down;
@@ -20,7 +22,8 @@ public class GuiBoxGenerator {
     private Image right;
     private Image plant;
 
-    public GuiBoxGenerator() {
+    public GuiBoxGenerator(Application app) {
+        this.app = app;
         try {
             up = new Image(new FileInputStream("src/main/resources/up.png"));
             down = new Image(new FileInputStream("src/main/resources/down.png"));
