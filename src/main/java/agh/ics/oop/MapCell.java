@@ -7,13 +7,13 @@ public class MapCell implements IMapCell {
     final Vector2d position;
     final IWorldMap map;
     private Boolean plantExist = false;
-    private boolean isJungle = false;
+    private boolean isJungle;
 
     public List<Animal> animals = new ArrayList<>();
     private final Stack<Animal> animalsToRemove = new Stack<>();
 
     final int plantEnergy = 15;
-    final int energyToBreed = 100;
+    final int energyToBreed = OptionParser.startingEnergy/2;
 
     public MapCell(Vector2d position, IWorldMap map, Boolean isJungle){
         this.position = position;

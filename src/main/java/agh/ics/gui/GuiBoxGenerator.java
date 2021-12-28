@@ -3,6 +3,7 @@ package agh.ics.gui;
 import agh.ics.oop.Animal;
 import agh.ics.oop.IMapCell;
 import agh.ics.oop.IWorldMap;
+import agh.ics.oop.OptionParser;
 import javafx.application.Application;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -13,6 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
+import javax.swing.text.html.Option;
 import java.io.FileInputStream;
 
 public class GuiBoxGenerator {
@@ -32,7 +34,7 @@ public class GuiBoxGenerator {
             down = new Image(new FileInputStream("src/main/resources/down.png"));
             left = new Image(new FileInputStream("src/main/resources/left.png"));
             right = new Image(new FileInputStream("src/main/resources/right.png"));
-            plant = new Image(new FileInputStream("src/main/resources/grass.png"));
+            plant = new Image(new FileInputStream("src/main/resources/watermelon.png"));
         }
         catch (Exception e) {
             System.out.println(e);
@@ -49,25 +51,34 @@ public class GuiBoxGenerator {
         };
     }
 
+    private Color getColor(IMapCell cell) {
+        if (cell.isJungle()) return Color.LAWNGREEN;
+        return Color.LIGHTBLUE;
+    }
+
     public StackPane getView(IMapCell cell, int width, int height) {
-        if (cell.getStrongest() == null && cell.plantExist()) {
+        Animal pet = cell.getStrongest();
+        if (pet == null && cell.plantExist()) {
             ImageView view = new ImageView(plant);
             view.setFitWidth(width);
             view.setFitHeight(height);
-            return new StackPane(new Rectangle(width, height, Color.GREEN), view);
+            return new StackPane(new Rectangle(width, height, getColor(cell)), view);
         }
-        else if (cell.getStrongest() == null) {
-            if (cell.isJungle()) return new StackPane(new Rectangle(width, height, Color.BROWN));
-            return new StackPane(new Rectangle(width, height, Color.GREEN));
+        else if (pet == null) {
+            if (cell.isJungle()) return new StackPane(new Rectangle(width, height, getColor(cell)));
+            return new StackPane(new Rectangle(width, height, getColor(cell)));
         }
         ImageView view = new ImageView(this.getImage(cell));
-        view.setFitWidth(width);
-        view.setFitHeight(height);
+        view.setFitWidth(width-4);
+        view.setFitHeight(height-4);
 
-        Label energyLevel = new Label(String.valueOf(cell.getStrongest().getEnergy()));
-        energyLevel.setFont(Font.font("Cambria", 10));
+        int green = Math.min(255, (255*pet.getEnergy() / OptionParser.startingEnergy));
+        System.out.println(green);
+        Rectangle energyLevel = new Rectangle(width,4,Color.rgb(255-green,green,0, 1.0));
 
-        StackPane stackPane = new StackPane(new Rectangle(width, height, Color.BLUE), new VBox(view, energyLevel));
+//        Rectangle energyLevel = new Rectangle(width,4,Color.hsb(120,1.0,0.6, 1.0));
+
+        StackPane stackPane = new StackPane(new Rectangle(width, height, getColor(cell)), new VBox(view, energyLevel));
         return stackPane;
     }
 }

@@ -11,7 +11,7 @@ public class SimulationEngine implements ISimulationEngine{
     final ITaskManager manager;
     private boolean flag = true;
     private Random rand = new Random();
-    private int startingEnergy = 100;
+    private int startingEnergy = OptionParser.startingEnergy;
 
     public SimulationEngine(int numOfAnimals, IWorldMap map, App gui) {
         this.gui = gui;

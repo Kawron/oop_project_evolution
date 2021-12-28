@@ -1,5 +1,7 @@
 package agh.ics.gui;
 
+// Chciałbym podziękować Bognie Gawron za wykonanie ilustracji <3
+
 import agh.ics.oop.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -8,40 +10,45 @@ import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class App extends Application {
 
-    StatisticEngine borderStats = new StatisticEngine();
-    IWorldMap borderMap = new WorldMap(10,10,2, borderStats);
-    ISimulationEngine borderEngine = new SimulationEngine(100, borderMap, this);
-    Thread borderThread = null;
-
-    StatisticEngine infStats = new StatisticEngine();
-    IWorldMap infMap = new BorderlessWorldMap(10,10,2, infStats);
-    ISimulationEngine infEngine = new SimulationEngine(100, infMap, this);
-    Thread infThread = null;
 
     Scene mainScene, optionsScene;
 
     Charts charts = new Charts();
     GuiBoxGenerator generator = new GuiBoxGenerator(this);
-    HBox mainBox;
     VBox selectedAnimal = new VBox(new Label("No Animal Chosen"));
     GridPane leftMap;
     GridPane rightMap;
     Animal theChosenOne = null;
+    OptionParser parser = new OptionParser();
 
-    int minWidth = 10;
-    int minHeight = 10;
-    int maxWidth = 25;
-    int maxHeight = 50;
+    StatisticEngine borderStats;
+    IWorldMap borderMap;
+    ISimulationEngine borderEngine;
+    Thread borderThread;
 
-    public void initOptions() {
-//        map = new BorderMap(20, 50, 2);
-//        engine = new SimulationEngine(10);
+    StatisticEngine infStats;
+    IWorldMap infMap;
+    ISimulationEngine infEngine;
+    Thread infThread;
+
+    private void initThreads() {
+         borderStats = new StatisticEngine();
+         borderMap = new WorldMap(OptionParser.borderWidth,OptionParser.borderHeight,OptionParser.jungleRatio, borderStats);
+         borderEngine = new SimulationEngine(OptionParser.borderAnimals, borderMap, this);
+         borderThread = null;
+
+         infStats = new StatisticEngine();
+         infMap = new BorderlessWorldMap(OptionParser.infWidth,OptionParser.infHeight,OptionParser.jungleRatio, infStats);
+         infEngine = new SimulationEngine(OptionParser.infAnimals, infMap, this);
+         infThread = null;
     }
+
 
     private void updateGrid(GridPane pane, IWorldMap map) {
         pane.setGridLinesVisible(false);
@@ -85,8 +92,8 @@ public class App extends Application {
         }
         pane.setGridLinesVisible(true);
     }
-
     // imo bezsensu no bo bezsensu no dwie mapy będą co dzień robiły to samo
+
     public void renderNextDay(IWorldMap map) {
         Platform.runLater(() -> updateMap(map));
     }
@@ -173,7 +180,7 @@ public class App extends Application {
             infStats.saveToCSV("BorderlessCSV");
         });
 
-        Button stopResumeBorder = new Button("stop/Resume");
+        Button stopResumeBorder = new Button("Stop/Resume");
         stopResumeBorder.setMinWidth(100);
         stopResumeBorder.setMinHeight(40);
         stopResumeBorder.setOnAction((actionEvent) -> {
@@ -181,7 +188,7 @@ public class App extends Application {
             System.out.println("stopResumeBorder");
         });
 
-        Button stopResumeInf = new Button("stop/Resume");
+        Button stopResumeInf = new Button("Stop/Resume");
         stopResumeInf.setMinWidth(100);
         stopResumeInf.setMinHeight(40);
         stopResumeInf.setOnAction((actionEvent) -> {
@@ -232,14 +239,55 @@ public class App extends Application {
         return new HBox(options, maps);
     }
 
-    public HBox initOptionsScene() {
+    public VBox initOptionsScene(Stage primaryStage) {
+        Label title = new Label("Select Options");
 
+        Label infoAboutSize = new Label("Min size is 10 and max size is 27");
+        Label infSizeLabel = new Label("Select Size for borderless map");
+        Label borderSizeLabel = new Label("Select size for border map");
+        TextField infSizeInput = new TextField();
+        TextField borderSizeInput = new TextField();
+
+        Label animalsInfLabel = new Label("Enter amount of animals on borderless map");
+        TextField animalsInf = new TextField();
+
+        Label animalsBorderLabel = new Label("Enter amount of animals on border map");
+        TextField animalsBorder = new TextField();
+
+        Label infoEnergy = new Label("Enter Starting Energy");
+        TextField energy = new TextField();
+
+        Label jungleRatioInfo = new Label("Select Jungle Ratio");
+        TextField jungleRatio = new TextField();
+
+        Button startButton = new Button("Apply");
+        startButton.setOnAction(event -> {
+            int infWidth = Integer.parseInt(infSizeInput.getText(0,2));
+            int infHeight = Integer.parseInt(infSizeInput.getText(3,5));
+            int infAnimals = Integer.parseInt(animalsInf.getText());
+
+            int borderWidth = Integer.parseInt(borderSizeInput.getText(0,2));
+            int borderHeight = Integer.parseInt(borderSizeInput.getText(3,5));
+            int borderAnimals = Integer.parseInt(animalsBorder.getText());
+
+            int energyLevel = Integer.parseInt(energy.getText());
+
+            parser.infMapOptions(infWidth, infHeight, infAnimals);
+            parser.borderMapOptions(borderWidth, borderHeight, borderAnimals);
+            parser.setStartingEnergy(energyLevel);
+            initThreads();
+            mainScene = new Scene(initScene(), 1500, 750);
+            primaryStage.setScene(mainScene);
+        });
+        VBox res = new VBox(title, infoAboutSize, infSizeLabel, infSizeInput, borderSizeLabel, borderSizeInput);
+        res.getChildren().addAll(animalsInfLabel, animalsInf, animalsBorderLabel, animalsBorder, infoEnergy, energy);
+        res.getChildren().addAll(jungleRatioInfo, jungleRatio, startButton);
+        return res;
     }
 
     public void start(Stage primaryStage) {
 
-        mainScene = new Scene(initScene(), 1500, 750);
-        optionsScene = new Scene(initOptionsScene(), 500, 750);
+        optionsScene = new Scene(initOptionsScene(primaryStage), 500, 750);
         primaryStage.setScene(optionsScene);
         primaryStage.show();
     }
