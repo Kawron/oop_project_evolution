@@ -49,24 +49,25 @@ public class GuiBoxGenerator {
         };
     }
 
-    public StackPane getView(IMapCell cell) {
+    public StackPane getView(IMapCell cell, int width, int height) {
         if (cell.getStrongest() == null && cell.plantExist()) {
             ImageView view = new ImageView(plant);
-            view.setFitWidth(14);
-            view.setFitHeight(14);
-            return new StackPane(new Rectangle(20, 20, Color.GREEN), view);
+            view.setFitWidth(width);
+            view.setFitHeight(height);
+            return new StackPane(new Rectangle(width, height, Color.GREEN), view);
         }
         else if (cell.getStrongest() == null) {
-            return new StackPane();
+            if (cell.isJungle()) return new StackPane(new Rectangle(width, height, Color.BROWN));
+            return new StackPane(new Rectangle(width, height, Color.GREEN));
         }
         ImageView view = new ImageView(this.getImage(cell));
-        view.setFitWidth(14);
-        view.setFitHeight(14);
+        view.setFitWidth(width);
+        view.setFitHeight(height);
 
         Label energyLevel = new Label(String.valueOf(cell.getStrongest().getEnergy()));
         energyLevel.setFont(Font.font("Cambria", 10));
 
-        StackPane stackPane = new StackPane(new Rectangle(20, 20, Color.BLUE), new VBox(view, energyLevel));
+        StackPane stackPane = new StackPane(new Rectangle(width, height, Color.BLUE), new VBox(view, energyLevel));
         return stackPane;
     }
 }

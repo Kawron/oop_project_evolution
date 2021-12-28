@@ -24,11 +24,6 @@ public class SimulationEngine implements ISimulationEngine{
     }
 
     public void run() {
-        int day = 0;
-
-        long startTime;
-        long endTime;
-
         while (map.getAnimals().size() > 0) {
             synchronized(this) {
                 while(!flag) {
@@ -41,21 +36,19 @@ public class SimulationEngine implements ISimulationEngine{
                 }
             }
             try {
-                Thread.sleep(100);
-                startTime = System.nanoTime();
+                Thread.sleep(300);
                 manager.buryAnimals();
                 manager.moveAnimals();
                 manager.feedAnimals();
                 manager.breedAnimals();
+
                 map.putPlants();
-                day++;
-                endTime = System.nanoTime();
-//            System.out.println(endTime-startTime);
-//                System.out.println(day);
-//                System.out.println(map.getAnimals().size());
-                // jak ktoś chce to można day % x = 0 i jest co x dni
-                gui.renderNextDay(map);
+                map.sendData();
+
                 gui.updateData();
+                gui.updateStatistic(map);
+                gui.renderNextDay(map);
+
                 map.nextDay();
             }
             catch (Exception e) {

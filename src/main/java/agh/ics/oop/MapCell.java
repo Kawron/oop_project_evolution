@@ -7,6 +7,7 @@ public class MapCell implements IMapCell {
     final Vector2d position;
     final IWorldMap map;
     private Boolean plantExist = false;
+    private boolean isJungle = false;
 
     public List<Animal> animals = new ArrayList<>();
     private final Stack<Animal> animalsToRemove = new Stack<>();
@@ -14,9 +15,10 @@ public class MapCell implements IMapCell {
     final int plantEnergy = 15;
     final int energyToBreed = 100;
 
-    public MapCell(Vector2d position, IWorldMap map){
+    public MapCell(Vector2d position, IWorldMap map, Boolean isJungle){
         this.position = position;
         this.map = map;
+        this.isJungle = isJungle;
     }
 
     public void animalEnteredCell(Animal pet) {
@@ -82,6 +84,7 @@ public class MapCell implements IMapCell {
             }
         }
         plantExist = !plantExist;
+        map.plantEaten();
     }
 
     public void buryAnimals() {
@@ -129,5 +132,9 @@ public class MapCell implements IMapCell {
 
     public boolean hasAnimals() {
         return animals.size() > 0;
+    }
+
+    public boolean isJungle() {
+        return isJungle;
     }
 }

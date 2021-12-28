@@ -25,4 +25,7 @@ public interface IMapCell {
     List<Animal> getAnimals();
 
     boolean hasAnimals();
+
+    boolean isJungle();
+
 }

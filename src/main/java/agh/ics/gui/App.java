@@ -1,41 +1,36 @@
 package agh.ics.gui;
 
 import agh.ics.oop.*;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import javafx.util.Duration;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
 
 public class App extends Application {
 
-    IWorldMap borderMap = new WorldMap(10,10,2);
+    StatisticEngine borderStats = new StatisticEngine();
+    IWorldMap borderMap = new WorldMap(10,10,2, borderStats);
     ISimulationEngine borderEngine = new SimulationEngine(100, borderMap, this);
     Thread borderThread = null;
 
-    IWorldMap infMap = new BorderlessWorldMap(10,10,2);
+    StatisticEngine infStats = new StatisticEngine();
+    IWorldMap infMap = new BorderlessWorldMap(10,10,2, infStats);
     ISimulationEngine infEngine = new SimulationEngine(100, infMap, this);
     Thread infThread = null;
 
+    Scene mainScene, optionsScene;
+
+    Charts charts = new Charts();
     GuiBoxGenerator generator = new GuiBoxGenerator(this);
     HBox mainBox;
     VBox selectedAnimal = new VBox(new Label("No Animal Chosen"));
     GridPane leftMap;
     GridPane rightMap;
-    VBox options;
     Animal theChosenOne = null;
 
     int minWidth = 10;
@@ -54,7 +49,7 @@ public class App extends Application {
         pane.getRowConstraints().clear();
         pane.getColumnConstraints().clear();
 
-        int constraint = Math.min((int)450/ map.getWidth(), (int)700/ map.getHeight());
+        int constraint = Math.min((int)450/(map.getWidth()+1), (int)600/(map.getHeight()+1));
         ColumnConstraints columnConstraints = new ColumnConstraints(constraint);
         RowConstraints rowConstraints = new RowConstraints(constraint);
         pane.getColumnConstraints().add(columnConstraints);
@@ -80,7 +75,7 @@ public class App extends Application {
         for (IMapCell cell : map.getCells().values()) {
             Vector2d position = cell.getPosition();
 
-            StackPane node = generator.getView(cell);
+            StackPane node = generator.getView(cell, constraint, constraint);
             node.setOnMouseClicked(event -> {
                 System.out.println("Choosen Animal");
                 theChosenOne = cell.getStrongest();
@@ -100,6 +95,13 @@ public class App extends Application {
         Platform.runLater(this::showDataAboutAnimal);
     }
 
+    public void updateStatistic(IWorldMap map) {Platform.runLater(()->{
+        if (map == infMap) {
+            charts.updateRightChart(map, infStats);
+        }
+        else charts.updateLeftChart(map, borderStats);
+    });}
+
     private void updateMap(IWorldMap map) {
         if (map instanceof WorldMap) updateGrid(rightMap, map);
         else updateGrid(leftMap, map);
@@ -107,20 +109,25 @@ public class App extends Application {
 
     public HBox initMapView() {
         leftMap = new GridPane();
-        leftMap.maxWidth(400);
-        leftMap.minWidth(400);
         updateGrid(leftMap, infMap);
 
         rightMap = new GridPane();
-        rightMap.maxWidth(400);
-        rightMap.minWidth(400);
         updateGrid(rightMap, borderMap);
 
-        return new HBox(leftMap, rightMap);
+        HBox res = new HBox(leftMap,rightMap);
+        res.setSpacing(100);
+        res.setPrefSize(1000.0, 600.0);
+        res.setAlignment(Pos.CENTER);
+
+        return res;
     }
 
     public VBox initGraphConsole() {
-        return new VBox(new Label("test"));
+        LineChart leftChart = charts.getLeftChart();
+        LineChart rightChart = charts.getRightChart();
+
+        HBox graphs = new HBox(leftChart, rightChart);
+        return new VBox(graphs);
     }
 
     public VBox initButtonsView() {
@@ -155,6 +162,7 @@ public class App extends Application {
         saveBorder.setMinHeight(40);
         saveBorder.setOnAction((actionEvent) -> {
             System.out.println("saveBorder");
+            borderStats.saveToCSV("BorderCSV");
         });
 
         Button saveInf= new Button("Save Borderless Simulation to CSV");
@@ -162,6 +170,7 @@ public class App extends Application {
         saveInf.setMinHeight(40);
         saveInf.setOnAction((actionEvent) -> {
             System.out.println("saveInf");
+            infStats.saveToCSV("BorderlessCSV");
         });
 
         Button stopResumeBorder = new Button("stop/Resume");
@@ -202,12 +211,18 @@ public class App extends Application {
             }
         });
 
-        VBox borderVbox = new VBox(new Label("Border Simulation"), stopResumeBorder, startBorder);
-        VBox infVbox = new VBox(new Label("Borderless Simulation"), stopResumeInf, startInf);
+        VBox borderVbox = new VBox(new Label("Border Simulation"), startBorder, stopResumeBorder);
+        VBox infVbox = new VBox(new Label("Borderless Simulation"), startInf, stopResumeInf);
         HBox hbox = new HBox(infVbox, borderVbox);
+        hbox.setSpacing(10.0);
+        hbox.setAlignment(Pos.BASELINE_CENTER);
 
         // dodać speed
-        return new VBox(startAll, stopAll, saveBorder, saveInf, hbox);
+        VBox res = new VBox(startAll, stopAll, saveInf, saveBorder, hbox);
+        res.setMinSize(450.0, 600.0);
+        res.setSpacing(10.0);
+        res.setAlignment(Pos.BASELINE_CENTER);
+        return res;
     }
 
     public HBox initScene() {
@@ -217,11 +232,15 @@ public class App extends Application {
         return new HBox(options, maps);
     }
 
-    public void start(Stage primaryStage) {
-        mainBox = initScene();
+    public HBox initOptionsScene() {
 
-        Scene scene = new Scene(mainBox, 1500, 750);
-        primaryStage.setScene(scene);
+    }
+
+    public void start(Stage primaryStage) {
+
+        mainScene = new Scene(initScene(), 1500, 750);
+        optionsScene = new Scene(initOptionsScene(), 500, 750);
+        primaryStage.setScene(optionsScene);
         primaryStage.show();
     }
 
@@ -234,11 +253,10 @@ public class App extends Application {
             selectedAnimal.getChildren().add(info);
             return;
         }
-//
-        Label genesLabel = new Label("Genes of animal");
+
         Label genes = new Label(pet.printGenes());
         selectedAnimal.getChildren().add(genes);
-//
+
         Label deathMsg;
         if (pet.deathDay < 0) {
             deathMsg = new Label("Animal is still alive");
@@ -248,11 +266,9 @@ public class App extends Application {
         }
         selectedAnimal.getChildren().add(deathMsg);
 
-        Label childCount = new Label(String.format("The number of children: %d", pet.countChildren(pet)));
-        Label descendant = new Label(String.format("The number of children: %d", pet.countDescendants(pet)));
+        Label childCount = new Label(String.format("The number of children: %d", pet.countChildren()));
+        Label descendant = new Label(String.format("The number of descendants: %d", pet.countDescendants(pet)));
         selectedAnimal.getChildren().add(childCount);
         selectedAnimal.getChildren().add(descendant);
-//        System.out.println(pet.countChildren(pet));
-//        System.out.println(pet.countDescendants(pet));
     }
 }

@@ -4,13 +4,11 @@ import java.util.*;
 
 public class Animal {
     public int deathDay = -1;
+    public int bornDay = 0;
     private Vector2d position;
     private int energy;
     private MapDirection direction;
     public IWorldMap map;
-
-    public Animal parent1;
-    public Animal parent2;
 
     public List<Animal> children = new ArrayList<>();
 
@@ -23,6 +21,7 @@ public class Animal {
         this.energy = energy;
         this.position = position;
         this.direction = MapDirection.NORTH;
+        this.bornDay = map.getDay();
 
         // randomize genes
         if (genes == null) {
@@ -128,7 +127,7 @@ public class Animal {
         return descendants.size();
     }
 
-    public int countChildren(Animal pet) {
-        return pet.children.size();
+    public int countChildren() {
+        return this.children.size();
     }
 }

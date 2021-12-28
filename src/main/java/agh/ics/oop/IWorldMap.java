@@ -24,4 +24,10 @@ public interface IWorldMap extends IMoveObserver{
     void nextDay();
 
     int getDay();
+
+    void plantEaten();
+
+    int getNumOfPlants();
+
+    void sendData();
 }

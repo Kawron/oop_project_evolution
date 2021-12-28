@@ -4,8 +4,8 @@ import java.util.*;
 
 public class WorldMap extends AbstractWorldMap {
 
-    public WorldMap(int width, int height, int jungleRatio) {
-        super(width, height, jungleRatio);
+    public WorldMap(int width, int height, int jungleRatio, StatisticEngine statEngine) {
+        super(width, height, jungleRatio, statEngine);
     }
 
     public void positionChanged(Animal pet, Vector2d oldPosition, Vector2d newPosition) {
