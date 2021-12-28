@@ -19,7 +19,7 @@ import java.io.FileInputStream;
 
 public class GuiBoxGenerator {
 
-    Application app;
+    App app;
     VBox vbox;
     private Image up;
     private Image down;
@@ -27,7 +27,7 @@ public class GuiBoxGenerator {
     private Image right;
     private Image plant;
 
-    public GuiBoxGenerator(Application app) {
+    public GuiBoxGenerator(App app) {
         this.app = app;
         try {
             up = new Image(new FileInputStream("src/main/resources/up.png"));
@@ -52,7 +52,8 @@ public class GuiBoxGenerator {
     }
 
     private Color getColor(IMapCell cell) {
-        if (cell.isJungle()) return Color.LAWNGREEN;
+        if (cell.getStrongest() == app.theChosenOne && app.theChosenOne != null) return Color.YELLOW;
+        if (cell.isJungle()) {return Color.BEIGE;};
         return Color.LIGHTBLUE;
     }
 

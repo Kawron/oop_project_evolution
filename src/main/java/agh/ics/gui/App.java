@@ -76,15 +76,12 @@ public class App extends Application {
             cnt ++;
         }
 
-        // można zrobic hashmape z roslinam i zwierzakami
-//        System.out.println(map.getAnimals().size());
 
         for (IMapCell cell : map.getCells().values()) {
             Vector2d position = cell.getPosition();
 
             StackPane node = generator.getView(cell, constraint, constraint);
             node.setOnMouseClicked(event -> {
-                System.out.println("Choosen Animal");
                 theChosenOne = cell.getStrongest();
                 showDataAboutAnimal();
             });
@@ -92,7 +89,6 @@ public class App extends Application {
         }
         pane.setGridLinesVisible(true);
     }
-    // imo bezsensu no bo bezsensu no dwie mapy będą co dzień robiły to samo
 
     public void renderNextDay(IWorldMap map) {
         Platform.runLater(() -> updateMap(map));
@@ -104,9 +100,9 @@ public class App extends Application {
 
     public void updateStatistic(IWorldMap map) {Platform.runLater(()->{
         if (map == infMap) {
-            charts.updateRightChart(map, infStats);
+            charts.updateLeftChart(map, infStats);
         }
-        else charts.updateLeftChart(map, borderStats);
+        else charts.updateRightChart(map, borderStats);
     });}
 
     private void updateMap(IWorldMap map) {
@@ -224,7 +220,6 @@ public class App extends Application {
         hbox.setSpacing(10.0);
         hbox.setAlignment(Pos.BASELINE_CENTER);
 
-        // dodać speed
         VBox res = new VBox(startAll, stopAll, saveInf, saveBorder, hbox);
         res.setMinSize(450.0, 600.0);
         res.setSpacing(10.0);
@@ -275,6 +270,7 @@ public class App extends Application {
             parser.infMapOptions(infWidth, infHeight, infAnimals);
             parser.borderMapOptions(borderWidth, borderHeight, borderAnimals);
             parser.setStartingEnergy(energyLevel);
+            parser.setJungleRatio(Integer.parseInt(jungleRatio.getText()));
             initThreads();
             mainScene = new Scene(initScene(), 1500, 750);
             primaryStage.setScene(mainScene);
